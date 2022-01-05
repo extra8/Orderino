@@ -1,0 +1,80 @@
+﻿@using Microsoft.AspNetCore.WebUtilities;
+
+@inject NavigationManager navigationManager
+
+
+<div class="banner-container">
+    <div class="banner">
+        <div>
+            <NavLink class="nav-link top-menu-logo" style="font-size: 30px; font-weight: 600; color: #594AE2;" href="@($"/restaurant-browser/{orderId}/{userId}")">
+                Orderino
+            </NavLink>
+        </div>
+        <div>
+            <form class="top-menu-search">
+                <input type="text" name="search" @bind-value="@searchTerm" style="border-color: #594AE2; border-style: solid; border-radius: 8px; width: 35vw; height: 4vh; font-size: 20px; padding: 10px;">
+                <button @onclick="Search"><i class="oi oi-magnifying-glass" style="display: table-cell; color: #594AE2; font-size: 20px; padding-bottom: 8px; padding-left: 8px;"></i></button>
+            </form>
+        </div>
+        <div>
+            <NavLink class="nav-link top-menu-favorites" href="@($"/favorites/{orderId}/{userId}")">
+                <span class="oi oi-star"></span>
+            </NavLink>
+        </div>
+        <div>
+            <NavLink class="nav-link top-menu-cart" href="@($"/cart/{orderId}/{userId}")">
+                <span class="oi oi-cart"></span>
+            </NavLink>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private string searchTerm;
+
+    private string currentUrl;
+
+    private string userId;
+
+    private string orderId;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = navigationManager.Uri.ToString();
+
+        if (currentUrl.Contains("/restaurant-browser/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant-browser/") + "/restaurant-browser/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        if (currentUrl.Contains("/restaurant/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant/") + "/restaurant/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        if (currentUrl.Contains("/cart/"))
+        {
+            int startIndex = currentUrl.IndexOf("/cart/") + "/cart/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        if (currentUrl.Contains("/favorites/"))
+        {
+            int startIndex = currentUrl.IndexOf("/favorites/") + "/favorites/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        userId = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+    }
+
+    private void Search()
+    {
+        var query = new Dictionary<string, string> { { "search", searchTerm } };
+
+        navigationManager.NavigateTo(QueryHelpers.AddQueryString("/restaurant-browser/{orderId}/{userId}", query));
+    }
+}

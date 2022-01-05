@@ -1,0 +1,82 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.7/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.7",
+  "version": "0.0.1",
+  "showLoadingIndicator": false,
+  "id": "10a05393-07d2-4950-9ffd-63f3e0099b23",
+  "packageName": "Orderino",
+  "developer": {
+    "name": "Orderino",
+    "websiteUrl": "https://orderinoappservice.azurewebsites.net",
+    "privacyUrl": "https://orderinoappservice.azurewebsites.net/privacy",
+    "termsOfUseUrl": "https://orderinoappservice.azurewebsites.net/termsofuse"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Orderino",
+    "full": "Orderino"
+  },
+  "description": {
+    "short": "Orderino",
+    "full": "Orderino"
+  },
+  "accentColor": "#FFFFFF",
+  "bots": [
+    {
+      "botId": "10a05393-07d2-4950-9ffd-63f3e0099b23",
+      "scopes": [
+        "team",
+        "groupchat",
+        "personal"
+      ],
+      "commandLists": [
+        {
+          "scopes": [
+            "personal"
+          ],
+          "commands": [
+            {
+              "title": "Help",
+              "description": "Get help and start ordering"
+            }
+          ]
+        },
+        {
+          "scopes": [
+            "team"
+          ],
+          "commands": [
+            {
+              "title": "Help",
+              "description": "Get help and start ordering"
+            }
+          ]
+        },
+        {
+          "scopes": [
+            "groupchat"
+          ],
+          "commands": [
+            {
+              "title": "Help",
+              "description": "Get help and start ordering"
+            }
+          ]
+        }
+      ],
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "https://orderinoappservice.azurewebsites.net",
+    "*.ngrok.io"
+  ]
+}

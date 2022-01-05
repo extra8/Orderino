@@ -1,0 +1,198 @@
+﻿@page "/restaurant-management/{restaurantId}/{token}"
+
+@using Orderino.Repository;
+@using Orderino.Repository.Models;
+@using BlazorInputFile; 
+@using System.IO;
+
+@inject Repository<LoginInfo> loginIngoRepository
+@inject Repository<Restaurant> restaurantRepository
+
+
+<center>
+    <div class="menu-items-container-background">
+        <div class="menu-container">
+            <div class="col-md-8 mb-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Restaurant Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example1">Restaurant Name</label>
+                                <input type="text" id="form7Example1" class="form-control" @bind="restaurant.Name" />
+                            </div>
+
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example4">Address 1</label>
+                                <input type="text" id="form7Example4" class="form-control" @bind="restaurant.Address.Line1" />
+                            </div>
+
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example4">Address 2</label>
+                                <input type="text" id="form7Example4" class="form-control" @bind="restaurant.Address.Line2" />
+                            </div>
+
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example4">City</label>
+                                <input type="text" id="form7Example4" class="form-control" @bind="restaurant.Address.City" />
+                            </div>
+
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example6">Phone</label>
+                                <input type="tel" id="form7Example6" class="form-control" @bind="restaurant.Phone" />
+                            </div>
+
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example6">Email</label>
+                                <input type="email" id="form7Example6" class="form-control" @bind="restaurant.Email" />
+                            </div>
+
+                            <div class="form-outline mb-4" style="text-align: left;">
+                                <label class="form-label" for="form7Example7">Description</label>
+                                <textarea class="form-control" id="form7Example7" rows="4" @bind="restaurant.Description"></textarea>
+                            </div>
+                        </form>
+
+                        <InputFile id="bannerInput" OnChange="UploadBanner" hidden multiple />
+                        <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Filled.Image" for="bannerInput">Upload Banner</MudButton>
+
+                        <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="@SaveChanges">
+                            Save
+                        </button>
+
+                        <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="@AddMenuItem">
+                            Add Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (restaurant?.Menu != null)
+            {
+                @foreach (var menuItem in restaurant.Menu)
+                {
+                    <div class="form-outline mb-4" style="text-align: left;">
+                        <label class="form-label" for="form7Example1">Name</label>
+                        <input type="text" id="form7Example1" class="form-control" @bind="menuItem.Name" />
+                    </div>
+
+                    <div class="form-outline mb-4" style="text-align: left;">
+                        <label class="form-label" for="form7Example1">Category</label>
+                        <input type="text" id="form7Example1" class="form-control" @bind="menuItem.MenuCategory" />
+                    </div>
+
+                    <div class="form-outline mb-4" style="text-align: left;">
+                        <label class="form-label" for="form7Example1">Description</label>
+                        <input type="text" id="form7Example1" class="form-control" @bind="menuItem.Description" />
+                    </div>
+
+                    <div class="form-outline mb-4" style="text-align: left;">
+                        <label class="form-label" for="form7Example1">Price</label>
+                        <input type="text" id="form7Example1" class="form-control" @bind="menuItem.Price" />
+                    </div>
+
+                    <InputFile id="@{$"fileInput{index}"}" OnChange="(e) => UploadMenuItemPicture(e, menuItem)" hidden multiple />
+                    <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Filled.Image" for="@{$"fileInput{index}"}">Upload Image</MudButton>
+                    index++;
+
+                    <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="() => RemoveMenuItem(menuItem)">
+                        Remove
+                    </button>
+                }
+            }
+
+        </div>
+    </div>
+</center>
+
+
+@code {
+
+    [Parameter]
+    public string restaurantId { get; set; }
+
+    [Parameter]
+    public string token { get; set; }
+
+    private Restaurant restaurant;
+    private string originalRestaurantName;
+    private LoginInfo loginInfo;
+    private int index = 0;
+
+    public RestaurantManagement()
+    {
+        restaurant = new Restaurant
+        {
+            Name = string.Empty,
+            Email = string.Empty,
+            Phone = string.Empty,
+            Description = string.Empty,
+            Address = new Address
+            {
+                Line1 = string.Empty,
+                Line2 = string.Empty,
+                City = string.Empty
+            }
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        restaurant = await restaurantRepository.QueryItemAsync(restaurantId);
+        originalRestaurantName = restaurant.Name;
+    }
+
+    private async Task SaveChanges()
+    {
+        restaurant.Menu.ForEach(x => x.RestaurantName = originalRestaurantName);
+        await restaurantRepository.Update(restaurant);
+        originalRestaurantName = restaurant.Name;
+    }
+
+    private async Task UploadBanner(IFileListEntry[] e)
+    {
+        restaurant.BannerString = await ProcessImage(e);
+    }
+
+    private async Task UploadMenuItemPicture(IFileListEntry[] e, OrderItem menuItem)
+    {
+        menuItem.ImageUrl = await ProcessImage(e);
+    }
+
+    private async Task<string> ProcessImage(IFileListEntry[] e)
+    {
+        var image = e.FirstOrDefault();
+
+        if (image == null)
+        {
+            return null;
+        }
+
+        var ms = new MemoryStream();
+        await image.Data.CopyToAsync(ms);
+        var imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
+
+        return imageDataUrl;
+    }
+
+    private void AddMenuItem()
+    {
+        restaurant.Menu.Add(new OrderItem
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = string.Empty,
+            MenuCategory = string.Empty,
+            Description = string.Empty,
+            Price = 0,
+            RestaurantId = restaurant.Id,
+            RestaurantName = restaurant.Name
+        });
+    }
+
+    private void RemoveMenuItem(OrderItem menuItem)
+    {
+        restaurant.Menu.RemoveAll(x => x.Id == menuItem.Id);
+    }
+}

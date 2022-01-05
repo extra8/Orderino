@@ -1,0 +1,29 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager navigationManager
+
+<MudThemeProvider />
+
+@if(showNavMenu)
+{ 
+    <div>
+        <NavMenu />
+    </div>
+}
+
+<div class="main">
+    <div class="content" style="background-color: #d6ddff;">
+        @Body
+    </div>
+</div>
+
+
+@code {
+
+    private bool showNavMenu;
+
+    protected override void OnInitialized()
+    {
+        showNavMenu = !navigationManager.Uri.ToString().Contains("restaurant-management");
+    }
+
+}

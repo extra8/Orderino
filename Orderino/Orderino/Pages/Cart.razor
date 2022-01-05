@@ -1,0 +1,201 @@
+﻿@page "/cart/{orderId}/{userId}"
+
+@using Orderino.Repository;
+@using Orderino.Repository.Models;
+@using Orderino.Utils;
+
+@inject Repository<Order> orderRepository
+@inject Repository<FinalizedOrder> finalizedOrderRepository
+@inject NavigationManager navigationManager
+@inject SessionCache sessionCache
+
+
+<div class="container-background">
+    <div class="restaurants-container">
+        <div style="width: 35vw;">
+            <MudExpansionPanels MultiExpansion="true">
+
+                @foreach (var keyVal in GetItemsByUser())
+                {
+                    string userFullName = keyVal.Value.First().SelectorFirstName + " " + keyVal.Value.First().SelectorLastName;
+
+                    <MudExpansionPanel Text="@userFullName" IsExpanded="true">
+
+                        @foreach (var orderItem in keyVal.Value)
+                        {
+                            <div style="display: grid; grid-template-columns: 5fr 0.7fr 1fr;">
+                                <div style="color: #594ae2; padding-top: 10px;">
+                                    <MudText> @orderItem.OrderItem.Name </MudText>
+                                </div>
+                                <MudTextField @bind-Value="orderItem.OrderItem.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense" @onfocusout="(x) => ModifyOrder(x)"></MudTextField>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" @onclick="() => DeleteOrderItem(orderItem.OrderItem.Id)"></MudIconButton>
+                            </div>
+                        }
+
+                    </MudExpansionPanel>
+                }
+
+            </MudExpansionPanels>
+        </div>
+        <div>
+            <div class="row">
+                <div class="col-md-8 mb-4">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0">Biling details</h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <input type="text" id="form7Example1" class="form-control" @bind="firstName" />
+                                            <label class="form-label" for="form7Example1">First name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <input type="text" id="form7Example2" class="form-control" @bind="lastName" />
+                                            <label class="form-label" for="form7Example2">Last name</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-outline mb-4">
+                                    <input type="text" id="form7Example4" class="form-control" @bind="address" />
+                                    <label class="form-label" for="form7Example4">Address</label>
+                                </div>
+
+                                <div class="form-outline mb-4">
+                                    <input type="tel" id="form7Example6" class="form-control" @bind="phone" />
+                                    <label class="form-label" for="form7Example6">Phone</label>
+                                </div>
+
+                                <div class="form-outline mb-4">
+                                    <textarea class="form-control" id="form7Example7" rows="4" @bind="additionalInfo"></textarea>
+                                    <label class="form-label" for="form7Example7">Additional information</label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0">Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                    Products
+                                    <span>@order?.Total.ToString("#.##")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    Delivery
+                                    <span>FREE</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                    <div>
+                                        <strong>Total amount</strong>
+                                        <strong>
+                                            <p class="mb-0">(including VAT)</p>
+                                        </strong>
+                                    </div>
+                                    <span><strong>@order?.Total.ToString("#.##")</strong></span>
+                                </li>
+                            </ul>
+
+                            <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="@FinalizeOrder">
+                                Finalize
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string userId { get; set; }
+
+    [Parameter]
+    public string orderId { get; set; }
+
+    private Order order;
+    private string firstName;
+    private string lastName;
+    private string address;
+    private string phone;
+    private string additionalInfo;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        order = await orderRepository.QueryItemAsync(orderId);
+    }
+
+    private Dictionary<string, List<SelectedOrderItem>> GetItemsByUser()
+    {
+        var itemsByUser = new Dictionary<string, List<SelectedOrderItem>>();
+
+        order?.Items?.ForEach(x =>
+        {
+            bool keyExist = itemsByUser.ContainsKey(x.SelectorId);
+
+            if (keyExist)
+                itemsByUser[x.SelectorId].Add(x);
+            else
+                itemsByUser.Add(x.SelectorId, new List<SelectedOrderItem> { x });
+        });
+
+        return itemsByUser;
+    }
+
+    private async Task DeleteOrderItem(string orderItemId)
+    {
+        var canModify = order.Items.Any(x => x.SelectorId == userId && x.OrderItem.Id == orderItemId);
+
+        if (canModify)
+        {
+            var currentOrder = await orderRepository.QueryItemAsync(orderId);
+            currentOrder.Items.RemoveAll(x => x.SelectorId == userId && x.OrderItem.Id == orderItemId);
+
+            await orderRepository.Update(currentOrder);
+            order = currentOrder;
+        }
+    }
+
+    private async Task ModifyOrder(FocusEventArgs args)
+    {
+        var currentUserItems = order.Items.Where(x => x.SelectorId == userId).ToList();
+
+        var currentOrder = await orderRepository.QueryItemAsync(orderId);
+        currentOrder.Items.RemoveAll(x => x.SelectorId == userId);
+        currentOrder.Items.AddRange(currentUserItems);
+
+        await orderRepository.Update(currentOrder);
+        order = currentOrder;
+    }
+
+    private async Task FinalizeOrder()
+    {
+        order = await orderRepository.QueryItemAsync(orderId);
+        var finalizedOrdersCollection = await finalizedOrderRepository.QueryItemAsync(order.Id);
+
+        if (finalizedOrdersCollection.Orders == null)
+            finalizedOrdersCollection.Orders = new List<Order>();
+
+        finalizedOrdersCollection.Id = order.Id;
+        finalizedOrdersCollection.Orders.Add(order);
+
+        await finalizedOrderRepository.Update(finalizedOrdersCollection);
+        await orderRepository.Delete(order);
+
+        string route = $"/restaurant-browser/{orderId}/{userId}";
+        navigationManager.NavigateTo(route);
+    }
+}

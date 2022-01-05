@@ -1,0 +1,140 @@
+﻿@page "/restaurant/{orderId}/{restaurantId}/{userId}"
+
+@using Orderino.Repository;
+@using Orderino.Repository.Models;
+@using Orderino.Utils;
+@using System.Linq;
+
+@inject Repository<Restaurant> restaurantRepository
+@inject Repository<User> userRepository
+@inject Repository<Order> orderRepository
+@inject NavigationManager navigationManager
+@inject SessionCache sessionCache
+
+
+<div class="menu-items-container-background">
+    <div class="menu-container">
+        @foreach (string category in GetMenuCategories())
+        {
+            <div class="menu-category-header">
+                <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 700;">@category</MudText>
+            </div>
+
+            <div class="menu-items-container">
+                @foreach (OrderItem item in GetMenuItemsForCategory(category))
+                {
+                    <MudCard>
+                        <MudCardMedia Image="@item.ImageUrl" Height="200" />
+                        <MudCardContent>
+                            <MudText Typo="Typo.h5" Align="Align.Left">@item.Name</MudText>
+                            <MudText Typo="Typo.body2">@item.Description</MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; ">
+                                <MudTextField @bind-Value="item.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Default" OnClick="() => AddToCart(item)" />
+
+                                @if (user.Favorites != null && user.Favorites.Any(x => x.Id == item.Id))
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Star" Color="Color.Primary" OnClick="() => RemoveFromFavorites(item)" />
+                                }
+                                else
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Outlined.Star" Color="Color.Default" OnClick="() => AddToFavorites(item)" />
+                                }
+
+                                <div class="item-card-price">
+                                    <MudText Typo="Typo.h5" Align="Align.Right" Style="flex: 1px;">@item.Price lei</MudText>
+                                </div>
+                            </div>
+                        </MudCardActions>
+                    </MudCard>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string userId { get; set; }
+
+    [Parameter]
+    public string restaurantId { get; set; }
+
+    [Parameter]
+    public string orderId { get; set; }
+
+    private Restaurant restaurant;
+    private User user;
+
+    protected override void OnParametersSet()
+    {
+        restaurant = sessionCache.Get<Restaurant>(restaurantId);
+        user = sessionCache.Get<User>(userId);
+    }
+
+    private List<string> GetMenuCategories()
+    {
+        return restaurant.Menu.Select(x => x.MenuCategory).Distinct().ToList();
+    }
+
+    private List<OrderItem> GetMenuItemsForCategory(string categoryName)
+    {
+        return restaurant.Menu.Where(x => x.MenuCategory == categoryName).ToList();
+    }
+
+    private async Task AddToCart(OrderItem item)
+    {
+        if(item.Quantity <= 0)
+            return;
+
+        var order = await orderRepository.QueryItemAsync(orderId);
+
+        if (order.Items == null)
+            order.Items = new List<SelectedOrderItem>();
+
+        var itemInOrderAlready = order.Items.FirstOrDefault(x => x.OrderItem.Id == item.Id && x.SelectorId == user.Id);
+
+        if (itemInOrderAlready != null)
+        {
+            itemInOrderAlready.OrderItem.Quantity += item.Quantity;
+        }
+        else
+        {
+            order.Items.Add(new SelectedOrderItem
+            {
+                OrderItem = item,
+                SelectorId = user.Id,
+                SelectorFirstName = user.FirstName,
+                SelectorLastName = user.LastName
+            });
+        }
+
+        double orderTotal = order.Items.Select(x => x.OrderItem.Price * x.OrderItem.Quantity).ToList().Sum();
+        order.Total = orderTotal;
+        await orderRepository.Update(order);
+    }
+
+    private async Task AddToFavorites(OrderItem item)
+    {
+        if (user.Favorites == null)
+            user.Favorites = new List<OrderItem>();
+
+        user.Favorites.Add(item);
+        await userRepository.Update(user);
+        sessionCache.Add(user.Id, user);
+    }
+
+    private async Task RemoveFromFavorites(OrderItem item)
+    {
+        if (user.Favorites == null)
+            user.Favorites = new List<OrderItem>();
+
+        user.Favorites.RemoveAll(x => x.Id == item.Id);
+        await userRepository.Update(user);
+        sessionCache.Add(user.Id, user);
+    }
+}

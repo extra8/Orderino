@@ -45,7 +45,7 @@ namespace Orderino.Repository
 
         public async Task BulkAddAsync(List<T> entities)
         {
-            List<Task> concurrentTasks = new List<Task>();
+            var concurrentTasks = new List<Task>();
 
             foreach (var entity in entities)
             {
@@ -95,7 +95,7 @@ namespace Orderino.Repository
             QueryDefinition queryDefinition = new QueryDefinition(sqlQuery);
             FeedIterator<T> queryResultSetIterator = container.GetItemQueryIterator<T>(queryDefinition);
 
-            List<T> entities = new List<T>();
+            var entities = new List<T>();
 
             while (queryResultSetIterator.HasMoreResults)
             {

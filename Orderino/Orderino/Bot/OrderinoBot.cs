@@ -23,13 +23,15 @@ namespace Orderino.Bots
         private readonly ILogger<OrderinoBot> logger;
         private readonly IConfiguration configuration;
         private readonly Repository<User> userRepository;
+        private readonly Repository<Order> orderRepository;
         private readonly SessionCache sessionCache;
 
-        public OrderinoBot(IConfiguration configuration, ILogger<OrderinoBot> logger, Repository<User> userRepository, SessionCache sessionCache)
+        public OrderinoBot(IConfiguration configuration, ILogger<OrderinoBot> logger, Repository<User> userRepository, Repository<Order> orderRepository, SessionCache sessionCache)
         {
             this.configuration = configuration;
             this.logger = logger;
             this.userRepository = userRepository;
+            this.orderRepository = orderRepository;
             this.sessionCache = sessionCache;
         }
 
@@ -44,18 +46,33 @@ namespace Orderino.Bots
         {
             try
             {
+                await StoreUsers(turnContext, cancellationToken);                
+
                 string command = turnContext.Activity.Text.Trim().Split(' ').Last().ToLower();
                 switch (command)
                 {
                     case "help":
                         logger.LogInformation("Sending a loading card");
-                        HelpCard helpCard = new HelpCard();
+                        var helpCard = new HelpCard();
                         await helpCard.SendHelpCard(turnContext, cancellationToken);
                         break;
-                    default: break;
-                }
 
-                await StoreUsers(turnContext, cancellationToken);
+                    case "order":
+                        var order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id);
+                        if (order.Initiator == null)
+                        {
+                            var user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
+                            order.Initiator = user;
+
+                            await orderRepository.Update(order);
+                        }
+                        logger.LogInformation("Sending an order card");
+                        var orderCard = new OrderCard();
+                        await orderCard.SendOrderCard(turnContext, cancellationToken);
+                        break;
+
+                    default: break;
+                }                                
             }
             catch (Exception ex)
             {
@@ -110,9 +127,13 @@ namespace Orderino.Bots
             var data = ((dynamic)turnContext.Activity.Value).data.data.ToString();
             ActionButton action = JsonConvert.DeserializeObject<ActionButton>(data);
 
-            if (action.Type == "help")
+            switch (action.Type)
             {
-                return GetHelpTaskModule(turnContext, cancellationToken);
+                case "help":
+                    return GetHelpTaskModule(turnContext, cancellationToken);
+
+                case "order":
+                    return GetOrderTaskModule(turnContext, cancellationToken);
             }
 
             return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
@@ -125,8 +146,8 @@ namespace Orderino.Bots
                 Url = configuration["BaseUrl"] + "/counter",
                 FallbackUrl = configuration["BaseUrl"] + "/counter",
                 Title = "Orderino",
-                Width = 1280,
-                Height = 720,
+                Width = 1600,
+                Height = 900,
                 CompletionBotId = configuration["MicrosoftAppId"]
             };
 
@@ -139,6 +160,29 @@ namespace Orderino.Bots
             };
 
             return invokeResponse;
-        }               
+        }
+
+        private InvokeResponse GetOrderTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            var taskModule = new TaskModuleTaskInfo
+            {
+                Url = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
+                FallbackUrl = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
+                Title = "Orderino",
+                Width = 1600,
+                Height = 900,
+                CompletionBotId = configuration["MicrosoftAppId"]
+            };
+
+            var tmContinueResponse = new TaskModuleContinueResponse(taskModule);
+            var tmResponse = new TaskModuleResponse(tmContinueResponse);
+            var invokeResponse = new InvokeResponse
+            {
+                Body = tmResponse,
+                Status = 200
+            };
+
+            return invokeResponse;
+        }
     }
 }

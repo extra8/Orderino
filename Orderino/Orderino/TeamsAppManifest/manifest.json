@@ -40,7 +40,11 @@
           "commands": [
             {
               "title": "Help",
-              "description": "Get help and start ordering"
+              "description": "Have a question?"
+            },
+            {
+              "title": "Order",
+              "description": "Begin an order!"
             }
           ]
         },
@@ -51,7 +55,11 @@
           "commands": [
             {
               "title": "Help",
-              "description": "Get help and start ordering"
+              "description": "Have a question?"
+            },
+            {
+              "title": "Order",
+              "description": "Begin an order!"
             }
           ]
         },
@@ -62,7 +70,11 @@
           "commands": [
             {
               "title": "Help",
-              "description": "Get help and start ordering"
+              "description": "Have a question?"
+            },
+            {
+              "title": "Order",
+              "description": "Begin an order!"
             }
           ]
         }

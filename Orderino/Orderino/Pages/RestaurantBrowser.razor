@@ -44,7 +44,10 @@
     {
         user = await userRepositry.QueryItemAsync(userId);
         sessionCache.Add(userId, user);
+    }
 
+    protected override async Task OnParametersSetAsync()
+    {
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out StringValues search);
 
@@ -56,11 +59,6 @@
         {
             restaurants = await restaurantRepository.QueryByNameSearch(search);
         }
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-
     }
 
     private void OpenRestaurant(Restaurant restaurant)

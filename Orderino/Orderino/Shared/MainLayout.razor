@@ -3,10 +3,16 @@
 
 <MudThemeProvider />
 
-@if(showNavMenu)
-{ 
+@if (!showAdminNavMenu)
+{
     <div>
         <NavMenu />
+    </div>
+}
+else
+{
+    <div>
+        <AdminNavMenu />
     </div>
 }
 
@@ -19,11 +25,14 @@
 
 @code {
 
-    private bool showNavMenu;
+    private bool showAdminNavMenu;
 
     protected override void OnInitialized()
     {
-        showNavMenu = !navigationManager.Uri.ToString().Contains("restaurant-management");
+        string uri = navigationManager.Uri.ToString();
+        showAdminNavMenu = uri.Contains("restaurant-management") ||
+                           uri.Contains("admin-login") ||
+                           uri.Contains("admin-restaurants");
     }
 
 }

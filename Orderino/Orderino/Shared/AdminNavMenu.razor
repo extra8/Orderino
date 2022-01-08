@@ -1,0 +1,56 @@
+﻿@using Orderino.Repository;
+@using Orderino.Repository.Models;
+
+@inject NavigationManager navigationManager
+@inject Repository<LoginInfo> loginInfoRepository
+
+
+<div class="banner-container">
+    <div class="banner">
+        <div>
+            <NavLink class="nav-link top-menu-logo" style="font-size: 30px; font-weight: 600; color: #594AE2; text-underline-position: below; cursor: pointer;" @onclick="@GetNavigationUrl">
+                Orderino
+            </NavLink>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private string navigateToUrl;
+    private string currentUrl;
+
+    protected async Task GetNavigationUrl()
+    {
+        currentUrl = navigationManager.Uri.ToString();
+
+        navigateToUrl = "/admin-login";
+
+        if (currentUrl.Contains("/restaurant-management/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant-management/") + "/restaurant-management/".Count();
+            string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+
+            var dbToken = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
+            if (dbToken != null && dbToken.TokenExpiration >= DateTime.UtcNow)
+            {
+                navigateToUrl = $"/admin-restaurants/{token}";
+            }
+        }
+
+        if (currentUrl.Contains("/admin-restaurants/"))
+        {
+            int startIndex = currentUrl.IndexOf("/admin-restaurants/") + "/admin-restaurants/".Count();
+            string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+
+            var dbToken = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
+            if (dbToken != null && dbToken.TokenExpiration >= DateTime.UtcNow)
+            {
+                navigateToUrl = $"/admin-restaurants/{token}";
+            }
+        }
+
+        navigationManager.NavigateTo(navigateToUrl);
+    }
+}

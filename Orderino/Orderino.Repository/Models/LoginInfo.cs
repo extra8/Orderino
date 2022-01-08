@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Orderino.Repository.Models
 {
@@ -6,6 +7,12 @@ namespace Orderino.Repository.Models
     {
         public string Id { get; set; }
 
-        public List<RestaurantAdmin> Administrators { get; set; }
+        public string Password { get; set; }
+
+        public List<RestaurantAdministration> Restaurants { get; set; }
+
+        public string Token { get; set; }
+
+        public DateTime TokenExpiration { get; set; }
     }
 }

@@ -2,11 +2,12 @@
 
 @using Orderino.Repository;
 @using Orderino.Repository.Models;
-@using BlazorInputFile; 
+@using BlazorInputFile;
 @using System.IO;
 
-@inject Repository<LoginInfo> loginIngoRepository
+@inject Repository<LoginInfo> loginInfoRepository
 @inject Repository<Restaurant> restaurantRepository
+@inject NavigationManager navigationManager
 
 
 <center>
@@ -118,7 +119,6 @@
 
     private Restaurant restaurant;
     private string originalRestaurantName;
-    private LoginInfo loginInfo;
     private int index = 0;
 
     public RestaurantManagement()
@@ -142,13 +142,29 @@
     {
         restaurant = await restaurantRepository.QueryItemAsync(restaurantId);
         originalRestaurantName = restaurant.Name;
+
+        var loginInfo = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
+
+        if (loginInfo == null || loginInfo.TokenExpiration < DateTime.UtcNow || !loginInfo.Restaurants.Select(x => x.RestaurantId).Contains(restaurant.Id))
+        {
+            navigationManager.NavigateTo("/admin-login");
+        }
     }
 
     private async Task SaveChanges()
     {
-        restaurant.Menu.ForEach(x => x.RestaurantName = originalRestaurantName);
-        await restaurantRepository.Update(restaurant);
-        originalRestaurantName = restaurant.Name;
+        var loginInfo = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
+
+        if (loginInfo != null && loginInfo.TokenExpiration >= DateTime.UtcNow && loginInfo.Restaurants.Select(x => x.RestaurantId).Contains(restaurant.Id))
+        {
+            restaurant.Menu.ForEach(x => x.RestaurantName = originalRestaurantName);
+            await restaurantRepository.Update(restaurant);
+            originalRestaurantName = restaurant.Name;
+
+            loginInfo.Restaurants.First(x => x.RestaurantId == restaurantId).BannerString = restaurant.BannerString;
+            loginInfo.Restaurants.First(x => x.RestaurantId == restaurantId).RestaurantName = restaurant.Name;
+            await loginInfoRepository.Update(loginInfo);
+        }
     }
 
     private async Task UploadBanner(IFileListEntry[] e)

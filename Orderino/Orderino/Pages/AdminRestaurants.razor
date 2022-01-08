@@ -1,0 +1,54 @@
+﻿@page "/admin-restaurants/{token}"
+
+@using Orderino.Repository;
+@using Orderino.Repository.Models;
+
+@inject NavigationManager navigationManager
+@inject Repository<LoginInfo> loginInfoRepository
+
+<center>
+    <MudItem xs="12" sm="6" md="4">
+        <MudSelect T="RestaurantAdministration" Label="Restaurants" Strict="true" Variant="Variant.Outlined" Format="F2" AnchorOrigin="Origin.BottomCenter" ValueChanged="x => SelectRestaurant(x)">
+            @if (loginInfo != null)
+            {
+                foreach (var restaurant in loginInfo.Restaurants)
+                {
+                    <MudSelectItem T="RestaurantAdministration" Value="restaurant"> @restaurant.RestaurantName </MudSelectItem>
+                }
+            }
+        </MudSelect>
+    </MudItem>
+
+    <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="OpenRestaurant">Go</button>
+</center>
+
+
+@code {
+
+    [Parameter]
+    public string token { get; set; }
+
+    private LoginInfo loginInfo;
+    private RestaurantAdministration selectedRestaurant;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loginInfo = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
+
+        if (loginInfo == null || loginInfo.TokenExpiration < DateTime.UtcNow)
+            navigationManager.NavigateTo("/admin-login");
+    }
+
+    private void SelectRestaurant(RestaurantAdministration restaurant)
+    { 
+        selectedRestaurant = restaurant;
+    }
+
+    private void OpenRestaurant()
+    {
+        if (selectedRestaurant == null)
+            return;
+
+        navigationManager.NavigateTo($"/restaurant-management/{selectedRestaurant.RestaurantId}/{token}");
+    }
+}

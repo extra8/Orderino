@@ -67,7 +67,7 @@ namespace Orderino.Repository
             return await QueryItemAsync(entity.Id);
         }
 
-        public async Task<T> QueryItemAsync(string entityId)
+        public async Task<T> QueryItemAsync(string entityId, bool createEntity = true)
         {
             try 
             {
@@ -75,17 +75,22 @@ namespace Orderino.Repository
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                var entityType = typeof(T);
-                var newEntity = (T) Activator.CreateInstance(Type.GetType(entityType.ToString()));
-                newEntity.Id = entityId;
+                if (createEntity)
+                {
+                    var entityType = typeof(T);
+                    var newEntity = (T)Activator.CreateInstance(Type.GetType(entityType.ToString()));
+                    newEntity.Id = entityId;
 
-                return await AddAsync(newEntity);
+                    return await AddAsync(newEntity);
+                }
+
+                return default;
             }            
         }
 
-        public async Task<List<T>> QueryByNameSearch(string search)
+        public async Task<List<T>> QueryByFieldName(string fieldName, string search)
         {
-            var sqlQuery = $"SELECT * FROM c WHERE c.Name LIKE '%{search}%'";
+            var sqlQuery = $"SELECT * FROM c WHERE c.{fieldName} LIKE '%{search}%'";
 
             return await QueryAllItemsAsync(sqlQuery);
         }

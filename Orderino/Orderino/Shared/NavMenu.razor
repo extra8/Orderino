@@ -5,23 +5,25 @@
 
 <div class="banner-container">
     <div class="banner">
-        <div>
-            <NavLink class="nav-link top-menu-logo" style="font-size: 30px; font-weight: 600; color: #594AE2;" href="@($"/restaurant-browser/{orderId}/{userId}")">
+        <div style="display:inline-flex; cursor:pointer;">
+            <a @onclick="@NavigateHome">
+                <img src="@logoPath" width="60px">
+            </a>
+
+            <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="NavigateHome">
                 Orderino
             </NavLink>
         </div>
         <div>
             <form class="top-menu-search">
-                <input type="text" name="search" @bind-value="@searchTerm" style="border-color: #594AE2; border-style: solid; border-radius: 8px; width: 35vw; height: 4vh; font-size: 20px; padding: 10px;">
-                <button @onclick="Search"><i class="oi oi-magnifying-glass" style="display: table-cell; color: #594AE2; font-size: 20px; padding-bottom: 8px; padding-left: 8px;"></i></button>
+                <input type="text" name="search" @bind-value="@searchTerm" class="top-menu-search-box">
             </form>
         </div>
-        <div>
+        <div style="display:inline-flex;">
             <NavLink class="nav-link top-menu-favorites" href="@($"/favorites/{orderId}/{userId}")">
                 <span class="oi oi-star"></span>
             </NavLink>
-        </div>
-        <div>
+
             <NavLink class="nav-link top-menu-cart" href="@($"/cart/{orderId}/{userId}")">
                 <span class="oi oi-cart"></span>
             </NavLink>
@@ -32,6 +34,8 @@
 
 @code {
 
+    private string logoPath = "assets/OrderinoLogo.png";
+
     private string searchTerm;
     private string currentUrl;
     private string userId;
@@ -40,6 +44,12 @@
     protected override void OnInitialized()
     {
         currentUrl = navigationManager.Uri.ToString();
+
+        if(currentUrl.Contains("?search"))
+        {
+            int indexOfSearch = currentUrl.IndexOf("?search");
+            currentUrl = currentUrl.Remove(indexOfSearch);
+        }
 
         if (currentUrl.Contains("/restaurant-browser/"))
         {
@@ -68,10 +78,10 @@
         userId = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
     }
 
-    private void Search()
+    private void NavigateHome()
     {
         var query = new Dictionary<string, string> { { "search", searchTerm } };
 
-        navigationManager.NavigateTo(QueryHelpers.AddQueryString("/restaurant-browser/{orderId}/{userId}", query));
+        navigationManager.NavigateTo($"/restaurant-browser/{orderId}/{userId}", forceLoad: true);
     }
 }

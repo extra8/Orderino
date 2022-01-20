@@ -3,21 +3,21 @@
 
 <MudThemeProvider />
 
-@if (!showAdminNavMenu)
-{
-    <div>
-        <NavMenu />
-    </div>
-}
-else
-{
-    <div>
-        <AdminNavMenu />
-    </div>
-}
+<div class="main" style="background: linear-gradient( 180deg, rgba(0,0,0,1) 35%, rgba(231,68,68,1) 130%);">
+    @if (!showAdminNavMenu)
+    {
+        <div>
+            <NavMenu />
+        </div>
+    }
+    else
+    {
+        <div>
+            <AdminNavMenu />
+        </div>
+    }
 
-<div class="main">
-    <div class="content" style="background-color: #d6ddff;">
+    <div class="content">
         @Body
     </div>
 </div>

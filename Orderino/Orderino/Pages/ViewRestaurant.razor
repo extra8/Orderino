@@ -16,21 +16,21 @@
     <div class="menu-container">
         @foreach (string category in GetMenuCategories())
         {
-            <div class="menu-category-header">
-                <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 700;">@category</MudText>
-            </div>
+        <div class="menu-category-header">
+            <h3 class="font" style="color: white; font-weight: 700; max-height: 40px; font-size: 60px;">@category</h3>
+        </div>
 
             <div class="menu-items-container">
                 @foreach (OrderItem item in GetMenuItemsForCategory(category))
                 {
-                    <MudCard>
+                    <MudCard Style="border-color: #e53333; border-style: solid; border-width: 3px; border-radius: 5px; ">
                         <MudCardMedia Image="@item.ImageUrl" Height="200" />
                         <MudCardContent>
                             <MudText Typo="Typo.h5" Align="Align.Left">@item.Name</MudText>
                             <MudText Typo="Typo.body2">@item.Description</MudText>
                         </MudCardContent>
                         <MudCardActions>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; ">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 2fr; ">
                                 <MudTextField @bind-Value="item.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                                 <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Default" OnClick="() => AddToCart(item)" />
 
@@ -44,7 +44,7 @@
                                 }
 
                                 <div class="item-card-price">
-                                    <MudText Typo="Typo.h5" Align="Align.Right" Style="flex: 1px;">@item.Price lei</MudText>
+                                    <MudText Typo="Typo.h6" Align="Align.Right" Style="flex: 1px;">@item.Price lei</MudText>
                                 </div>
                             </div>
                         </MudCardActions>

@@ -1,21 +1,23 @@
 ﻿body {
 }
 
+.font {
+    font-family: 'Cabin', sans-serif;
+}
+
 .container-background {
-    background-color: #ffffff;
     margin: 0 auto;
-    width: 70vw;
+    width: 90vw;
 }
 
 .banner-container {
-    background-color: #d6ddff;
     justify-content: center;
     display: flex;
 }
 
 .banner {
     display: grid;
-    grid-template-columns: 1fr 3fr 0.25fr 0.25fr;
+    grid-template-columns: 1fr 10fr 1fr 1fr;
     width: 70vw;
     justify-content: space-evenly;
     place-items: center;
@@ -26,14 +28,14 @@
     font-size: 25px;
     overflow: hidden;
     white-space: nowrap;
-    color: #594AE2;
+    color: #e74444;
 }
 
 .top-menu-favorites {
     font-size: 25px;
     overflow: hidden;
     white-space: nowrap;
-    color: #594AE2;
+    color: #e74444;
 }
 
 .top-menu-logo {
@@ -42,6 +44,18 @@
 
 .top-menu-search {
 
+}
+
+.top-menu-search-box {
+    border-color: #e74444;
+    background-color: black;
+    border-style: solid;
+    border-radius: 8px;
+    width: 35vw;
+    height: 4vh;
+    font-size: 20px;
+    padding: 10px;
+    color: #e74444;
 }
 
 .restaurants-container {
@@ -55,8 +69,10 @@
 .restaurant-banner {
     width: 35vw;
     height: 25vh;
-    position: relative;
     cursor: pointer;
+    border-color: #e53333;
+    border-style: solid;
+    border-radius: 5px;
 }
 
 .restaurant-banner-photo {
@@ -66,27 +82,22 @@
 }
 
 .restaurant-text {
-    position: absolute;
-    bottom: 25px;
-    font-size: 2rem;
+    font-size: 35px;
     color: white;
-    right: 70px;
-    display: inline;
-    text-shadow: -2px 0 #594AE2, 0 2px #594AE2, 2px 0 #594AE2, 0 -2px #594AE2;
+    padding-left: 15px;
+    display: block;
+    height: 17%;
+    background-color: rgba(229, 51, 51, 1);
 }
 
 .menu-container {
 }
 
 .menu-category-header {
-    padding: 1vh;
-    background-color: #aebbff;
-    border-radius: 8px;
-    border-style: none;
+    padding-top: 5vh;
 }
 
 .menu-items-container-background {
-    background-color: #d6ddff;
     margin: 0 auto;
     width: 70vw;
 }
@@ -97,7 +108,6 @@
     grid-gap: 2vh;
     padding-top: 15px;
     padding-bottom: 15px;
-    background-color: #d6ddff;
 }
 
 .item-card-price {

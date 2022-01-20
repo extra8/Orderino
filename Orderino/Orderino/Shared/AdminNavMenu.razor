@@ -7,8 +7,12 @@
 
 <div class="banner-container">
     <div class="banner">
-        <div>
-            <NavLink class="nav-link top-menu-logo" style="font-size: 30px; font-weight: 600; color: #594AE2; text-underline-position: below; cursor: pointer;" @onclick="@GetNavigationUrl">
+        <div style="display:inline-flex; cursor:pointer;">
+            <a @onclick="@GetNavigationUrl">
+                <img src="@logoPath" width="60px">
+            </a>
+
+            <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="@GetNavigationUrl">
                 Orderino
             </NavLink>
         </div>
@@ -17,6 +21,8 @@
 
 
 @code {
+
+    private string logoPath = "assets/OrderinoLogo.png";
 
     private string navigateToUrl;
     private string currentUrl;

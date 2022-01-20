@@ -17,10 +17,10 @@
         @foreach (var restaurant in restaurants)
         {
             <div class="restaurant-banner">
-                <div style="border-color: #594ae2; border-width: thick; border-style: solid; width: 100%; height: 100%; border-radius: 8px;">
+                <div style="width: 100%; height: 83%; ">
                     <img src="@GetBannerImage(restaurant.BannerString)" class="restaurant-banner-photo" @onclick="() => OpenRestaurant(restaurant)">
                 </div>                
-                <div class="restaurant-text" @onclick="() => OpenRestaurant(restaurant)">
+                <div class="restaurant-text font" @onclick="() => OpenRestaurant(restaurant)">
                      @restaurant.Name
                 </div>
             </div>

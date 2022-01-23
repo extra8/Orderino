@@ -114,6 +114,10 @@ namespace Orderino.Repository
             return entities;
         }
 
+        public async Task Upsert(T entity)
+        {
+            await container.UpsertItemAsync<T>(entity, new PartitionKey(entity.Id));
+        }
 
         public async Task Update(T entity)
         {            

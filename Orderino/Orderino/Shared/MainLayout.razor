@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager navigationManager
 
-<MudThemeProvider />
+<MudThemeProvider Theme="MyCustomTheme" />
 
 <div class="main" style="background: linear-gradient( 180deg, rgba(0,0,0,1) 35%, rgba(231,68,68,1) 130%);">
     @if (!showAdminNavMenu)
@@ -32,7 +32,18 @@
         string uri = navigationManager.Uri.ToString();
         showAdminNavMenu = uri.Contains("restaurant-management") ||
                            uri.Contains("admin-login") ||
-                           uri.Contains("admin-restaurants");
+                           uri.Contains("admin-restaurants") ||
+                           uri.Contains("history");
     }
 
+
+    MudTheme MyCustomTheme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Primary = "#e74444",
+            Secondary = Colors.Grey.Default,
+            Tertiary = "#ffffff"
+        }   
+    };
 }

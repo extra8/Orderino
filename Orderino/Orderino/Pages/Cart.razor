@@ -112,7 +112,7 @@
                                     </li>
                                 </ul>
 
-                                <button type="button" class="btn btn-primary btn-lg btn-block font" style=" background-color: white; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;" @onclick="@FinalizeOrder">
+                                <button type="button" class="btn btn-primary btn-lg btn-block font" style="background-color: white; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;" @onclick="@FinalizeOrder">
                                     Finalize
                                 </button>
                             </div>
@@ -197,6 +197,18 @@
             finalizedOrdersCollection.Orders = new List<Order>();
 
         finalizedOrdersCollection.Id = order.Id;
+        order.FinalizedId = Guid.NewGuid().ToString();
+        order.FinalizedTime = DateTime.UtcNow;
+        order.DeliveryPhone = phone;
+        order.DeliveryAddress = new DeliveryAddress
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Address = address,
+            Phone = phone,
+            AditionalInfo = additionalInfo
+        };
+
         finalizedOrdersCollection.Orders.Add(order);
 
         await finalizedOrderRepository.Update(finalizedOrdersCollection);

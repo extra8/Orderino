@@ -81,7 +81,8 @@
     private void NavigateHome()
     {
         var query = new Dictionary<string, string> { { "search", searchTerm } };
+        var path = $"/restaurant-browser/{orderId}/{userId}";        
 
-        navigationManager.NavigateTo($"/restaurant-browser/{orderId}/{userId}", forceLoad: true);
+        navigationManager.NavigateTo(path, forceLoad: true);
     }
 }

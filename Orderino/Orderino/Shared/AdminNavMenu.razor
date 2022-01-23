@@ -33,9 +33,9 @@
 
         navigateToUrl = "/admin-login";
 
-        if (currentUrl.Contains("/restaurant-management/"))
+        if (currentUrl.Contains("/restaurant-menu/"))
         {
-            int startIndex = currentUrl.IndexOf("/restaurant-management/") + "/restaurant-management/".Count();
+            int startIndex = currentUrl.IndexOf("/restaurant-menu/") + "/restaurant-menu/".Count();
             string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
 
             var dbToken = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
@@ -57,6 +57,9 @@
             }
         }
 
-        navigationManager.NavigateTo(navigateToUrl);
+        if (currentUrl.Contains("/history/"))
+            navigateToUrl = currentUrl;
+
+        navigationManager.NavigateTo(navigateToUrl, forceLoad: true);
     }
 }

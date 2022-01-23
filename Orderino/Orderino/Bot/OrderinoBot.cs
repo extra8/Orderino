@@ -63,6 +63,7 @@ namespace Orderino.Bots
                         {
                             var user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
                             order.Initiator = user;
+                            order.Initiator.Favorites = null;
 
                             await orderRepository.Update(order);
                         }

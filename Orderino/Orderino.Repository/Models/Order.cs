@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Orderino.Repository.Models
 {
@@ -10,10 +11,14 @@ namespace Orderino.Repository.Models
 
         public double Total { get; set; }
 
-        public Address DeliveryAddress { get; set; }
+        public DeliveryAddress DeliveryAddress { get; set; }
 
         public string DeliveryPhone { get; set; }
 
         public User Initiator { get; set; }
+
+        public string FinalizedId { get; set; }
+
+        public DateTime? FinalizedTime { get; set; }
     }
 }

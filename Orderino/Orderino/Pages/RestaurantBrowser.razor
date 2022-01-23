@@ -7,7 +7,7 @@
 @using Microsoft.Extensions.Primitives; 
 
 @inject Repository<Restaurant> restaurantRepository
-@inject Repository<User> userRepositry
+@inject Repository<User> userRepository
 @inject NavigationManager navigationManager
 @inject SessionCache sessionCache 
 
@@ -42,7 +42,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await userRepositry.QueryItemAsync(userId);
+        user = await userRepository.QueryItemAsync(userId);
         sessionCache.Add(userId, user);
     }
 

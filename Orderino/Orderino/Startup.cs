@@ -41,6 +41,7 @@ namespace Orderino
             services.AddSingleton(new Repository<Order>(cosmosDbConfigurationSection));
             services.AddSingleton(new Repository<FinalizedOrder>(cosmosDbConfigurationSection));
             services.AddSingleton(new Repository<LoginInfo>(cosmosDbConfigurationSection));
+            services.AddSingleton(new Repository<RestaurantStatistic>(cosmosDbConfigurationSection));
 
             services.AddSingleton(new SessionCache());
             services.AddMudServices();

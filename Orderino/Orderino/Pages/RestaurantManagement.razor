@@ -155,15 +155,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        restaurant = await restaurantRepository.QueryItemAsync(restaurantId);
-        originalRestaurantName = restaurant.Name;
-
         var loginInfo = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
 
-        if (loginInfo == null || loginInfo.TokenExpiration < DateTime.UtcNow || !loginInfo.Restaurants.Select(x => x.RestaurantId).Contains(restaurant.Id))
+        if (loginInfo == null || loginInfo.TokenExpiration < DateTime.UtcNow || !loginInfo.Restaurants.Select(x => x.RestaurantId).Contains(restaurantId))
         {
             navigationManager.NavigateTo("/admin-login");
         }
+
+        restaurant = await restaurantRepository.QueryItemAsync(restaurantId);
+        originalRestaurantName = restaurant.Name;
     }
 
     private async Task SaveChanges()

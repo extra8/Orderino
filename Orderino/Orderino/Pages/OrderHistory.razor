@@ -10,6 +10,16 @@
 @inject Repository<User> userRepository
 @inject NavigationManager navigationManager
 
+
+<style>
+    .mud-expand-panel.mud-panel-expanded {
+        margin: 8px 0;
+        border-radius: inherit;
+        border-bottom: none;
+        transition-delay: 0ms;
+    }
+</style>
+
 <div style=" margin: 0 auto; width: 70vw; padding-top: 50px;">
     <h3 class="font" style="color: white; font-size: 40px;">Order History</h3>
 
@@ -40,7 +50,7 @@
     @if (showOrder)
     {
         <div style="padding-top: 30px;">
-            <div style="width: 60%; margin-left: 20%; border-style: solid; border-color: #e53333; border-radius: 5px;">
+            <div style="width: 60%; margin-left: 20%; border-style: solid; border-color: #e53333; border-radius: 5px; background-color: #e53333;">
                 <MudExpansionPanels MultiExpansion="true" Style="background-color: black;">
 
                     @foreach (var keyVal in GetItemsByUser())
@@ -51,20 +61,32 @@
                             <TitleContent>
                                 <div class="d-flex">
                                     <MudIcon Icon="@Icons.Material.Filled.Person" Style="font-size: 32px; margin-right: 12px; color: black;"></MudIcon>
-                                    <MudText Typo="Typo.h5" Class="font">@userFullName</MudText>
+                                    <MudText Typo="Typo.h5" Class="font" Style="color: black;">@userFullName</MudText>
                                 </div>
                             </TitleContent>
                             <ChildContent>
-                                @foreach (var orderItem in keyVal.Value)
+                                @foreach (var tuple in GetItemsByRestaurant(keyVal.Value.First().SelectorId))
                                 {
-                                    <div style="display: grid; grid-template-columns: 5fr 1fr;">
-                                        <div style="color: #594ae2; padding-top: 10px;">
-                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
-                                        </div>
-                                        <div style="color: #594ae2; padding-top: 10px;">
-                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-weight: bold; float: right; padding-right: 30px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
-                                        </div>
-                                    </div>
+                                    <MudExpansionPanel IsExpanded="true">
+                                        <TitleContent>
+                                            <div class="d-flex">
+                                                <MudText Typo="Typo.h5" Class="font" Style="color: black;">@tuple.Value.First().OrderItem.RestaurantName</MudText>
+                                            </div>
+                                        </TitleContent>
+                                        <ChildContent>
+                                            @foreach (var orderItem in keyVal.Value)
+                                            {
+                                                <div style="display: grid; grid-template-columns: 5fr 1fr;">
+                                                    <div style="color: #594ae2; padding-top: 10px;">
+                                                        <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                    </div>
+                                                    <div style="color: #594ae2; padding-top: 10px;">
+                                                        <MudText Typo="Typo.h6" Style="color: #e74444; font-weight: bold; float: right; padding-right: 30px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </ChildContent>
+                                    </MudExpansionPanel>
                                 }
                             </ChildContent>
                         </MudExpansionPanel>
@@ -122,6 +144,25 @@
         });
 
         return itemsByUser;
+    }
+
+    private Dictionary<string, List<SelectedOrderItem>> GetItemsByRestaurant(string selectorId)
+    {
+        var items = GetItemsByUser();
+
+        var itemsByRestaurantByUser = new Dictionary<string, List<SelectedOrderItem>>();
+
+        items.First(x => x.Key == selectorId).Value.ForEach(x =>
+        {
+            bool keyExist = itemsByRestaurantByUser.ContainsKey(x.OrderItem.RestaurantId);
+
+            if (keyExist)
+                itemsByRestaurantByUser[x.OrderItem.RestaurantId].Add(x);
+            else
+                itemsByRestaurantByUser.Add(x.OrderItem.RestaurantId, new List<SelectedOrderItem> { x });
+        });
+
+        return itemsByRestaurantByUser;
     }
 
     private async Task Reorder()

@@ -55,6 +55,21 @@ namespace Orderino.Repository
             await Task.WhenAll(concurrentTasks);
         }
 
+        public async Task<List<T>> QueryAllItemsAsync(List<string> entityIds)
+        {
+            var sqlQuery = "SELECT * FROM c WHERE c.id IN (";
+
+            foreach (string id in entityIds)
+            {
+                sqlQuery += $"'{id}'" + ",";
+            }
+
+            sqlQuery = sqlQuery.Remove(sqlQuery.Length - 1, 1);
+            sqlQuery += ")";
+
+            return await QueryAllItemsAsync(sqlQuery);
+        }
+
         public async Task<List<T>> QueryAllItemsAsync()
         {
             var sqlQuery = "SELECT * FROM c";

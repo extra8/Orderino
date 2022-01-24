@@ -13,5 +13,7 @@ namespace Orderino.Repository.Models
         public string LastName { get; set; }
 
         public List<OrderItem> Favorites { get; set; }
+
+        public List<string> RecentRestaurantIds { get; set; }
     }
 }

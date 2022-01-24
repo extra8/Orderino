@@ -134,7 +134,7 @@ namespace Orderino.Bots
                     return GetHelpTaskModule(turnContext, cancellationToken);
 
                 case "order":
-                    return GetOrderTaskModule(turnContext, cancellationToken);
+                    return await GetOrderTaskModule(turnContext, cancellationToken);
             }
 
             return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
@@ -163,8 +163,18 @@ namespace Orderino.Bots
             return invokeResponse;
         }
 
-        private InvokeResponse GetOrderTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        private async Task<InvokeResponse> GetOrderTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
         {
+            var order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id);
+            if (order.Initiator == null)
+            {
+                var user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
+                order.Initiator = user;
+                order.Initiator.Favorites = null;
+
+                await orderRepository.Update(order);
+            }
+
             var taskModule = new TaskModuleTaskInfo
             {
                 Url = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",

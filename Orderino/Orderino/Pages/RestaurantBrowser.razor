@@ -10,22 +10,68 @@
 @inject Repository<User> userRepository
 @inject NavigationManager navigationManager
 @inject SessionCache sessionCache 
+@inject Microsoft.JSInterop.IJSRuntime JsRuntime
+
+
+@functions{
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await JsRuntime.InvokeAsync<object>("initializeCarousel");
+            firstRender = false;
+        }
+    }
+}
 
 
 <div class="container-background">
-    <div class="restaurants-container">
-        @foreach (var restaurant in restaurants)
-        {
-            <div class="restaurant-banner">
-                <div style="width: 100%; height: 83%; ">
-                    <img src="@GetBannerImage(restaurant.BannerString)" class="restaurant-banner-photo" @onclick="() => OpenRestaurant(restaurant)">
-                </div>                
-                <div class="restaurant-text font" @onclick="() => OpenRestaurant(restaurant)">
-                     @restaurant.Name
+    @if (user != null && restaurants != null)
+    {
+        <div style="padding: 35px;">
+            <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel" style="border-style: solid; border-radius: 5px; border-color: #e53333;">
+                <div class="carousel-inner">
+                    @foreach (var restaurant in restaurants.Where(x => user.RecentRestaurantIds.Contains(x.Id)).ToList())
+                    {
+                        @if (firstDiv)
+                        {
+                            <div class="carousel-item active">
+                                <img src="@GetBannerImage(restaurant.BannerString)">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <h5 class="font" style="font-size: 40px;">@restaurant.Name</h5>
+                                </div>
+                            </div>
+
+                            firstDiv = false;
+                        }
+                        else
+                        {
+                            <div class="carousel-item">
+                                <img src="@GetBannerImage(restaurant.BannerString)">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <h5 class="font" style="font-size: 40px;">@restaurant.Name</h5>
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
-        }
-    </div>
+        </div>
+
+        <div class="restaurants-container">
+            @foreach (var restaurant in restaurants)
+            {
+                <div class="restaurant-banner">
+                    <div style="width: 100%; height: 83%; ">
+                        <img src="@GetBannerImage(restaurant.BannerString)" class="restaurant-banner-photo" @onclick="() => OpenRestaurant(restaurant)">
+                    </div>
+                    <div class="restaurant-text font" @onclick="() => OpenRestaurant(restaurant)">
+                        @restaurant.Name
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 
@@ -40,14 +86,12 @@
     List<Restaurant> restaurants = new List<Restaurant>();
     User user;
 
+    bool firstDiv = true;
+
     protected override async Task OnInitializedAsync()
     {
         user = await userRepository.QueryItemAsync(userId);
-        sessionCache.Add(userId, user);
-    }
 
-    protected override async Task OnParametersSetAsync()
-    {
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out StringValues search);
 
@@ -59,6 +103,10 @@
         {
             restaurants = await restaurantRepository.QueryByFieldName("Name", search);
         }
+
+        restaurants = restaurants.Concat(restaurants).ToList();
+        restaurants = restaurants.Concat(restaurants).ToList();
+        restaurants = restaurants.Concat(restaurants).ToList();
     }
 
     private void OpenRestaurant(Restaurant restaurant)

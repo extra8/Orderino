@@ -57,6 +57,18 @@
             }
         }
 
+        if (currentUrl.Contains("/restaurant-statistics/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant-statistics/") + "/restaurant-statistics/".Count();
+            string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+
+            var dbToken = (await loginInfoRepository.QueryByFieldName("Token", token)).FirstOrDefault();
+            if (dbToken != null && dbToken.TokenExpiration >= DateTime.UtcNow)
+            {
+                navigateToUrl = $"/admin-restaurants/{token}";
+            }
+        }
+
         if (currentUrl.Contains("/history/"))
             navigateToUrl = currentUrl;
 

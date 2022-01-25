@@ -1,7 +1,46 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<div style="margin: 0 auto; width: 70vw; padding-top: 30px; color: white;">
+    <h3 class="font" style="color: white; font-weight: 700; max-height: 40px; font-size: 40px; padding-bottom: 60px;">Hello & welcome!</h3>
 
-Welcome to your new app.
+    <h4 class="font" style="padding-top: 40px;">I am Orderino, the best way of ordering your meals together with your friends and colleagues, all from within your Teams conversations!</h4>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    <h4 class="font" style="padding-top: 10px;">All you have to do is follow these simple steps and your meal will be on it's way.</h4>
+
+    <div class="font" style="padding: 30px;">
+        <div class="font" style="padding-bottom: 10px; font-size: 20px;">1. Add me to your conversations, team chats, meetings or simply as a one-on-one companion from the Teams Apps page.</div>
+
+        <div class="font" style="padding-bottom: 10px; font-size: 20px;">
+            <div class="font" style="">2. Call me with @Orderino, followed by your command, and I'll be there in a jiffy.</div>
+            <div class="font" style="padding: 20px;">
+                <div class="font" style="padding-top: 10px;">Use "Order" and I'll bring you all the offers available for you to consider when choosing your meal.</div>
+                <div class="font" style="padding-top: 10px;">Use "History" and I'll show you all your past orders.</div>
+                <div class="font" style="padding-top: 30px;"><span class="font" style="color: #e74444; font-weight: bold;">Note:</span> When you start a order, you will become the "Initiator" , which means you, and only you can finalize the order.</div>                 
+            </div>                 
+        </div>
+
+        <div class="font" style="padding-bottom: 10px; font-size: 20px;">3. When browsing the restaurants, just add the products to the cart, where you can check what you and every one else joining has selected.</div>
+
+        <div class="font" style="padding-bottom: 10px; font-size: 20px;">4. If you are the Initiator of the order, and everyone is done selecting their meals, just go to the card, complete the form, and then place the order</div>
+
+        <div class="font" style="padding-bottom: 10px; font-size: 20px;">5. Bon appetit!</div>
+    </div>
+
+    <div class="font" style="padding-top: 20px;">
+        <h4 class="font" style="">Loved that last meal?</h4>
+        <div class="font" style="font-size: 20px;">Well, if you ordered it from a one-on-one chat with yours truly, you can find that order in your order history, and click on "Reorder".</div>
+    </div>
+
+    <div class="font" style="padding-top:30px;">
+        <h4 class="font" style="">If you ever need anymore help, just call for me, and I'll be there!</h4>
+
+        <h4 class="font" style="">Bye!</h4>
+    </div>   
+
+</div>
+
+@code{
+
+    string Orderino = "@Orderino";
+
+}

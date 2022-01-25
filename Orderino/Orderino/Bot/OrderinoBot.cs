@@ -49,11 +49,12 @@ namespace Orderino.Bots
                 await StoreUsers(turnContext, cancellationToken);                
 
                 string command = turnContext.Activity.Text.Trim().Split(' ').Last().ToLower();
+                var helpCard = new HelpCard();
+
                 switch (command)
                 {
                     case "help":
-                        logger.LogInformation("Sending a loading card");
-                        var helpCard = new HelpCard();
+                        logger.LogInformation("Sending a help card");                        
                         await helpCard.SendHelpCard(turnContext, cancellationToken);
                         break;
 
@@ -65,6 +66,11 @@ namespace Orderino.Bots
                             order.Initiator = user;
                             order.Initiator.Favorites = null;
 
+                            if (turnContext.Activity.Conversation.ConversationType == "personal")
+                                order.OrderType = OrderType.Personal;
+                            else
+                                order.OrderType = OrderType.Group;
+
                             await orderRepository.Update(order);
                         }
                         logger.LogInformation("Sending an order card");
@@ -72,7 +78,16 @@ namespace Orderino.Bots
                         await orderCard.SendOrderCard(turnContext, cancellationToken);
                         break;
 
-                    default: break;
+                    case "history":
+                        logger.LogInformation("Sending a history card");
+                        var historyCard = new HistoryCard();
+                        await historyCard.SendHistoryCard(turnContext, cancellationToken);
+                        break;
+
+                    default:
+                        logger.LogInformation("Sending a loading card");                        
+                        await helpCard.SendHelpCard(turnContext, cancellationToken);
+                        break;
                 }                                
             }
             catch (Exception ex)
@@ -135,6 +150,13 @@ namespace Orderino.Bots
 
                 case "order":
                     return await GetOrderTaskModule(turnContext, cancellationToken);
+
+                case "history":
+                    return GetHistoryTaskModule(turnContext, cancellationToken);
+
+                case "markAsDone":
+                    //await orderRepository.QueryItemAsync();
+                    break;
             }
 
             return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
@@ -144,8 +166,8 @@ namespace Orderino.Bots
         {
             var taskModule = new TaskModuleTaskInfo
             {
-                Url = configuration["BaseUrl"] + "/counter",
-                FallbackUrl = configuration["BaseUrl"] + "/counter",
+                Url = configuration["BaseUrl"],
+                FallbackUrl = configuration["BaseUrl"],
                 Title = "Orderino",
                 Width = 1600,
                 Height = 900,
@@ -172,6 +194,11 @@ namespace Orderino.Bots
                 order.Initiator = user;
                 order.Initiator.Favorites = null;
 
+                if (turnContext.Activity.Conversation.ConversationType == "personal")
+                    order.OrderType = OrderType.Personal;
+                else
+                    order.OrderType = OrderType.Group;
+
                 await orderRepository.Update(order);
             }
 
@@ -179,6 +206,29 @@ namespace Orderino.Bots
             {
                 Url = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
                 FallbackUrl = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
+                Title = "Orderino",
+                Width = 1600,
+                Height = 900,
+                CompletionBotId = configuration["MicrosoftAppId"]
+            };
+
+            var tmContinueResponse = new TaskModuleContinueResponse(taskModule);
+            var tmResponse = new TaskModuleResponse(tmContinueResponse);
+            var invokeResponse = new InvokeResponse
+            {
+                Body = tmResponse,
+                Status = 200
+            };
+
+            return invokeResponse;
+        }
+
+        private InvokeResponse GetHistoryTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            var taskModule = new TaskModuleTaskInfo
+            {
+                Url = configuration["BaseUrl"] + $"/history/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
+                FallbackUrl = configuration["BaseUrl"] + $"/history/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
                 Title = "Orderino",
                 Width = 1600,
                 Height = 900,

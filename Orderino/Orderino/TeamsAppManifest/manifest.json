@@ -45,6 +45,10 @@
             {
               "title": "Order",
               "description": "Begin an order!"
+            },
+            {
+              "title": "History",
+              "description": "See your past orders!"
             }
           ]
         },
@@ -60,6 +64,10 @@
             {
               "title": "Order",
               "description": "Begin an order!"
+            },
+            {
+              "title": "History",
+              "description": "See your past orders!"
             }
           ]
         },
@@ -75,6 +83,10 @@
             {
               "title": "Order",
               "description": "Begin an order!"
+            },
+            {
+              "title": "History",
+              "description": "See your past orders!"
             }
           ]
         }

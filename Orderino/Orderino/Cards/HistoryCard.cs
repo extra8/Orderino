@@ -7,32 +7,32 @@ using System.Threading.Tasks;
 
 namespace Orderino.Cards
 {
-    public class HelpCard : CardBase
+    public class HistoryCard : CardBase
     {
-        public async Task SendHelpCard(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+        public async Task SendHistoryCard(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
             IMessageActivity activity = await SendLoadingCard(turnContext, cancellationToken);
 
             var activityId = turnContext.Activity.Id;
-            var cardAttachment = GetHelpCard(turnContext, cancellationToken, activityId);
+            var cardAttachment = GetHistoryCard(turnContext, cancellationToken, activityId);
             activity.Attachments.Clear();
             activity.Attachments.Add(cardAttachment);
 
             await turnContext.UpdateActivityAsync(activity, cancellationToken);
         }
 
-        private Attachment GetHelpCard(ITurnContext turnContext, CancellationToken cancellationToken, string activityId)
+        private Attachment GetHistoryCard(ITurnContext turnContext, CancellationToken cancellationToken, string activityId)
         {
             var heroCard = new HeroCard
             {
                 Title = "Orderino",
-                Subtitle = "Hi! Click the button below to see what I can help you with!",
+                Subtitle = "Click on the button below to view your past orders.",
                 Buttons = new List<CardAction>
                 {
-                    new CardAction(type: "invoke", title: "Help", image: null, text:"", displayText: "",
+                    new CardAction(type: "invoke", title: "History", image: null, text:"", displayText: "",
                     new CardValue<ActionButton>
                     {
-                        Data = new ActionButton { ActivityId = activityId, Type = "help" }
+                        Data = new ActionButton { ActivityId = activityId, Type = "history" }
                     })
                 }
             };

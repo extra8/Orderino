@@ -20,10 +20,10 @@
     }
 </style>
 
-<div style=" margin: 0 auto; width: 70vw; padding-top: 50px;">
+<div style="margin: 0 auto; width: 70vw; padding-top: 50px;">
     <h3 class="font" style="color: white; font-size: 40px;">Order History</h3>
 
-    <div style="padding-top: 3%; display: grid; grid-template-columns: auto auto auto; justify-content: center; align-content: space-between; ">
+    <div style="@showReorderStyle">
 
         <div style="padding-top: 12px; padding-right: 30px;">
             <select style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 28vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedOrderId">
@@ -42,9 +42,12 @@
             <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="ViewOrder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">View</button>
         </div>
 
-        <div style="">
-            <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="Reorder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Reorder</button>
-        </div>
+        @if (showReorder)
+        {
+            <div style="">
+                <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="Reorder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Reorder</button>
+            </div>
+        }
     </div>
 
     @if (showOrder)
@@ -113,11 +116,33 @@
     private string selectedOrderId;
     private Order selectedOrder;
     private bool showOrder;
+    private bool showReorder;
+    private string showReorderStyle;
+    private Order currentOrder;
 
     protected override async Task OnInitializedAsync()
     {
         finalizedOrder = await finalizedOrderRepository.QueryItemAsync(orderId);
         user = await userRepository.QueryItemAsync(userId);
+        currentOrder = await orderRepository.QueryItemAsync(orderId, false);
+
+        if (currentOrder != null || currentOrder?.Initiator != null)
+        {
+            if (currentOrder.OrderType == OrderType.Personal)
+            {
+                showReorder = true;
+
+                showReorderStyle = "padding-top: 3%; display: grid; grid-template-columns: auto auto auto; justify-content: center; align-content: space-between;";
+            }
+            else
+            {
+                showReorderStyle = "padding-top: 3%; display: grid; grid-template-columns: auto auto; justify-content: center; align-content: space-between;";
+            }
+        }
+        else
+        {
+            showReorderStyle = "padding-top: 3%; display: grid; grid-template-columns: auto auto; justify-content: center; align-content: space-between;";
+        }
     }
 
     private void ViewOrder()

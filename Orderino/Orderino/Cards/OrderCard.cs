@@ -26,13 +26,19 @@ namespace Orderino.Cards
             var heroCard = new HeroCard
             {
                 Title = "Orderino",
-                Subtitle = "You have started an order. Press the button below to begin selecting your meal!",
+                Subtitle = "You have started an order. Press \"Order\" to begin selecting your meal or if you are done selecting, or not hungry, on \"Mark as done\".",
                 Buttons = new List<CardAction>
                 {
                     new CardAction(type: "invoke", title: "Order", image: null, text:"", displayText: "",
                     new CardValue<ActionButton>
                     {
                         Data = new ActionButton { ActivityId = activityId, Type = "order" }
+                    }),
+
+                    new CardAction(type: "invoke", title: "Mark as done", image: null, text:"", displayText: "",
+                    new CardValue<ActionButton>
+                    {
+                        Data = new ActionButton { ActivityId = activityId, Type = "markAsDone" }
                     })
                 }
             };

@@ -60,15 +60,15 @@
 
 .restaurants-container {
     display: grid;
-    grid-gap: 2vh;
+    grid-gap: 5vh;
     padding: 20px;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto;
     justify-items: center;
 }
 
 .restaurant-banner {
-    width: 95%;
-    height: 25vh;
+    width: 80%;
+    height: 30vh;
     cursor: pointer;
     border-color: #e53333;
     border-style: solid;

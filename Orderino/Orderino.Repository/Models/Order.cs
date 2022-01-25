@@ -20,5 +20,9 @@ namespace Orderino.Repository.Models
         public string FinalizedId { get; set; }
 
         public DateTime? FinalizedTime { get; set; }
+
+        public OrderType OrderType { get; set; }
+
+        public List<string> DoneUserIds { get; set; }
     }
 }

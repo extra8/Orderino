@@ -190,7 +190,7 @@
 
     private async Task UploadMenuItemPicture(IFileListEntry[] e, OrderItem menuItem)
     {
-        menuItem.ImageUrl = await ProcessImage(e);
+        menuItem.ImageData = await ProcessImage(e);
     }
 
     private async Task<string> ProcessImage(IFileListEntry[] e)

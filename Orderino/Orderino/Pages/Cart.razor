@@ -22,6 +22,12 @@
 </style>
 
 <div style="margin: 0 auto; width: 90vw;">
+    <div style="padding-top: 30px;">
+        <div style="display: grid; justify-items: center; grid-template-columns: 1fr 0.525fr;">
+            <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="MarkAsDone" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Mark as done</button>
+        </div>
+    </div>
+
     <div style="display: grid; grid-gap: 2vh; padding: 20px; grid-template-columns: 1fr; justify-items: center;">
         @if (order != null && order.Items != null && order.Items.Count != 0)
         {
@@ -69,7 +75,7 @@
                 </MudExpansionPanels>
             </div>
         }
-        @if (true)
+        @if (order?.Initiator?.Id == userId)
         {
             <div style="width: 40vw;">
                 <div class="row">
@@ -306,5 +312,24 @@
 
         string route = $"/restaurant-browser/{orderId}/{userId}";
         navigationManager.NavigateTo(route);
+    }
+
+    private async Task MarkAsDone()
+    {
+        var order = await orderRepository.QueryItemAsync(orderId);
+
+        if(order.DoneUserIds == null)
+            order.DoneUserIds = new List<string>();
+
+        if(order.DoneUserIds.Contains(userId))
+        {
+            order.DoneUserIds.Remove(userId);
+        }
+        else
+        {
+            order.DoneUserIds.Add(userId);
+        }
+
+        await orderRepository.Update(order);
     }
 }

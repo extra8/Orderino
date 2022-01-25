@@ -23,7 +23,7 @@
             <div style="padding-top: 2%;">
                 <MudCard Style="background-color: rgba(0, 0, 0, 0);">
                     <MudCardContent>
-                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurant.Description</MudText>
+                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444; padding-bottom: 25px;">@restaurant.Description</MudText>
                         <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurant.Address</MudText>
                         <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurant.Phone</MudText>
                         <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurant.Email</MudText>
@@ -41,7 +41,7 @@
                     @foreach (OrderItem item in GetMenuItemsForCategory(category))
                     {
                         <MudCard Style="border-color: #e53333; border-style: solid; border-width: 3px; border-radius: 5px; min-height: 420px; max-width: 320px; ">
-                            <MudCardMedia Image="@item.ImageUrl" Style="height: 50%; min-height: 200px; max-height: 200px;" />
+                            <MudCardMedia Image="@item.ImageData" Style="height: 50%; min-height: 200px; max-height: 200px;" />
                             <MudCardContent Style="height: 40%;">
                                 <MudText Typo="Typo.h5" Align="Align.Left" Style="color: black;">@item.Name</MudText>
                                 <MudText Typo="Typo.body2" Style="color: black;">@item.Description</MudText>
@@ -86,6 +86,8 @@
 
     [Parameter]
     public string orderId { get; set; }
+
+    private string logoPath = "assets/OrderinoMissingProduct.png";
 
     private Restaurant restaurant;
     private User user;
@@ -176,6 +178,10 @@
 
     private string GetImage(string imageString)
     {
+        if (string.IsNullOrEmpty(imageString) || imageString.Length < 15 || !imageString.Substring(15).Contains("data:image"))
+            return logoPath;
+
         return string.Format("{0}", imageString);
     }
+
 }

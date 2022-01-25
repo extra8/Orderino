@@ -4,36 +4,62 @@
 <MudThemeProvider Theme="MyCustomTheme" />
 
 <div class="main" style="background: linear-gradient( 180deg, rgba(0,0,0,1) 35%, rgba(231,68,68,1) 130%);">
-    @if (!showAdminNavMenu)
+    @if (showSimpleNavMenu)
     {
         <div>
-            <NavMenu />
+            <SimpleNavMenu />
         </div>
     }
     else
     {
-        <div>
-            <AdminNavMenu />
-        </div>
+        @if (!showAdminNavMenu)
+        {
+            <div>
+                <NavMenu />
+            </div>
+        }
+        else
+        {
+            <div>
+               <AdminNavMenu />
+            </div>
+        }
     }
-
     <div class="content">
         @Body
+    </div>
+    <div class="banner-container" style="margin-top: 50px; padding-bottom: 20px;">
+        <div class="banner" style="display: flex; padding-bottom: 20px;">
+            <div style="display:inline-flex;">
+                <img src="@logoPath" width="60px">
+
+                <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: white;">
+                    Orderino
+                </NavLink>
+            </div>
+        </div>
     </div>
 </div>
 
 
 @code {
 
+    private string logoPath = "assets/OrderinoLogo.png";
+
     private bool showAdminNavMenu;
+    private bool showSimpleNavMenu;
 
     protected override void OnInitialized()
     {
         string uri = navigationManager.Uri.ToString();
+        int count = uri.Split('/').Length - 1;
+
         showAdminNavMenu = uri.Contains("restaurant-management") ||
                            uri.Contains("admin-login") ||
                            uri.Contains("admin-restaurants") ||
                            uri.Contains("history");
+
+        showSimpleNavMenu = uri.Contains("history") || count == 3;
     }
 
 
@@ -44,6 +70,6 @@
             Primary = "#e74444",
             Secondary = Colors.Grey.Default,
             Tertiary = "#ffffff"
-        }   
+        }
     };
 }

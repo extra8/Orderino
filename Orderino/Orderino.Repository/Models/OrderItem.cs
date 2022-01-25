@@ -14,7 +14,7 @@
 
         public string Description { get; set; }
 
-        public string ImageUrl { get; set; }
+        public string ImageData { get; set; }
 
         public int Quantity { get; set; }
 

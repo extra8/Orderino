@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AdaptiveCards" Version="1.2.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.1" />
+    <PackageReference Include="Microsoft.Bot.Builder" Version="4.8.0" />
+    <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.8.0" />
+    <PackageReference Include="Microsoft.Bot.Connector" Version="4.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Orderino.Repository\Orderino.Infrastructure.csproj" />
+    <ProjectReference Include="..\Client\Orderino.Client.csproj" />
+    <ProjectReference Include="..\Shared\Orderino.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Manifest\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Manifest\color.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Manifest\outline.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="powershell.exe -nologo -noprofile -command &quot;&amp; {Compress-Archive -Path 'D:\Programe\VisualStudio\Disertatie\repo\Orderino\Orderino\Server\Manifest\manifest.json', 'D:\Programe\VisualStudio\Disertatie\repo\Orderino\Orderino\Server\Manifest\outline.png', 'D:\Programe\VisualStudio\Disertatie\repo\Orderino\Orderino\Server\Manifest\color.png' -DestinationPath 'D:\Programe\VisualStudio\Disertatie\repo\Orderino\Orderino\Server\Manifest\Orderino.zip' -Force}&quot;&#xD;&#xA;" />
+  </Target>
+
+
+</Project>

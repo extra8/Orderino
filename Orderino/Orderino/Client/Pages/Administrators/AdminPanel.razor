@@ -1,0 +1,62 @@
+﻿@page "/admin-restaurants/{token}"
+
+@using Orderino.Shared.Models;
+
+@inject HttpClient httpClient
+@inject NavigationManager navigationManager
+
+
+<div style="text-align: center; padding-top: 3%;">
+
+    <div style="max-width: 30%; margin-left: 35%;">
+        <select style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 28vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedRestaurantId">
+            <option value=""></option>
+            @if (loginInfo != null)
+            {
+                @foreach (var restaurant in loginInfo.Restaurants)
+                {
+                    <option value="@restaurant.RestaurantId">@restaurant.RestaurantName</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div style="padding-top: 30px;">
+        <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="OpenRestaurantInfo" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Menu</button>
+        <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="OpenRestaurantStatistics" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Statistics</button>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string token { get; set; }
+
+    private LoginInfo loginInfo;
+    private string selectedRestaurantId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loginInfo = await httpClient.GetFromJsonAsync<LoginInfo>($"login/{token}");
+
+        if (loginInfo == null || loginInfo.TokenExpiration < DateTime.UtcNow)
+            navigationManager.NavigateTo("/admin-login");
+    }
+
+    private void OpenRestaurantInfo()
+    {
+        if (string.IsNullOrEmpty(selectedRestaurantId))
+            return;
+
+        navigationManager.NavigateTo($"/edit-restaurant/{selectedRestaurantId}/{token}");
+    }
+
+    private void OpenRestaurantStatistics()
+    {
+        if (string.IsNullOrEmpty(selectedRestaurantId))
+            return;
+
+        navigationManager.NavigateTo($"/restaurant-statistics/{selectedRestaurantId}/{token}");
+    }
+}

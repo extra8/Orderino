@@ -1,0 +1,86 @@
+﻿@inject NavigationManager navigationManager
+
+
+<div class="banner-container">
+    <div class="banner">
+        <div style="display:inline-flex; cursor:pointer;">
+            <a @onclick="@NavigateHome">
+                <img src="@logoPath" style="width:60px;">
+            </a>
+
+            <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="NavigateHome">
+                Orderino
+            </NavLink>
+        </div>
+        <div>
+            <form class="top-menu-search">
+                <input type="text" name="search" @bind-value="@searchTerm" class="top-menu-search-box">
+            </form>
+        </div>
+        <div style="display:inline-flex;">
+            <NavLink class="nav-link top-menu-favorites" href="@($"/favorites/{orderId}/{userId}")">
+                <span class="oi oi-star"></span>
+            </NavLink>
+
+            <NavLink class="nav-link top-menu-cart" href="@($"/cart/{orderId}/{userId}")">
+                <span class="oi oi-cart"></span>
+            </NavLink>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private string logoPath = "assets/OrderinoLogo.png";
+
+    private string searchTerm;
+    private string currentUrl;
+    private string userId;
+    private string orderId;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = navigationManager.Uri.ToString();
+
+        if (currentUrl.Contains("?search"))
+        {
+            int indexOfSearch = currentUrl.IndexOf("?search");
+            currentUrl = currentUrl.Remove(indexOfSearch);
+        }
+
+        if (currentUrl.Contains("/restaurant-browser/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant-browser/") + "/restaurant-browser/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        if (currentUrl.Contains("/restaurant/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant/") + "/restaurant/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        if (currentUrl.Contains("/cart/"))
+        {
+            int startIndex = currentUrl.IndexOf("/cart/") + "/cart/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        if (currentUrl.Contains("/favorites/"))
+        {
+            int startIndex = currentUrl.IndexOf("/favorites/") + "/favorites/".Count();
+            orderId = currentUrl.Substring(startIndex, currentUrl.LastIndexOf("/") - startIndex);
+        }
+
+        userId = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+    }
+
+    private void NavigateHome()
+    {
+        var query = new Dictionary<string, string> { { "search", searchTerm } };
+        var path = $"/restaurant-browser/{orderId}/{userId}";
+
+        navigationManager.NavigateTo(path, forceLoad: true);
+    }
+}

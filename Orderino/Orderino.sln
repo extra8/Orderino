@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+VisualStudioVersion = 16.0.32002.261
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orderino", "Orderino\Orderino.csproj", "{75564B86-1687-4E5A-881E-A3D43DB86931}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orderino.Server", "Orderino\Server\Orderino.Server.csproj", "{2EA3B1B5-1011-42E4-862D-4F156AD118B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orderino.Repository", "Orderino.Repository\Orderino.Repository.csproj", "{B5E57EA6-9F51-49BE-A9FF-8DED47EF6ACD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orderino.Client", "Orderino\Client\Orderino.Client.csproj", "{F9B2A81F-B475-41D7-882C-A30A6D1D6113}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orderino.Shared", "Orderino\Shared\Orderino.Shared.csproj", "{10857BD1-45B9-40BC-A04A-AD2C3BF93E7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orderino.Infrastructure", "Orderino.Repository\Orderino.Infrastructure.csproj", "{3A0B8E11-DE5C-4B3F-84B9-872CABDAD8E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,19 +17,27 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{75564B86-1687-4E5A-881E-A3D43DB86931}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75564B86-1687-4E5A-881E-A3D43DB86931}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75564B86-1687-4E5A-881E-A3D43DB86931}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75564B86-1687-4E5A-881E-A3D43DB86931}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5E57EA6-9F51-49BE-A9FF-8DED47EF6ACD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5E57EA6-9F51-49BE-A9FF-8DED47EF6ACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5E57EA6-9F51-49BE-A9FF-8DED47EF6ACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5E57EA6-9F51-49BE-A9FF-8DED47EF6ACD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EA3B1B5-1011-42E4-862D-4F156AD118B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EA3B1B5-1011-42E4-862D-4F156AD118B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EA3B1B5-1011-42E4-862D-4F156AD118B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EA3B1B5-1011-42E4-862D-4F156AD118B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9B2A81F-B475-41D7-882C-A30A6D1D6113}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9B2A81F-B475-41D7-882C-A30A6D1D6113}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9B2A81F-B475-41D7-882C-A30A6D1D6113}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9B2A81F-B475-41D7-882C-A30A6D1D6113}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10857BD1-45B9-40BC-A04A-AD2C3BF93E7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10857BD1-45B9-40BC-A04A-AD2C3BF93E7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10857BD1-45B9-40BC-A04A-AD2C3BF93E7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10857BD1-45B9-40BC-A04A-AD2C3BF93E7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A0B8E11-DE5C-4B3F-84B9-872CABDAD8E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A0B8E11-DE5C-4B3F-84B9-872CABDAD8E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A0B8E11-DE5C-4B3F-84B9-872CABDAD8E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A0B8E11-DE5C-4B3F-84B9-872CABDAD8E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {C3E29BB0-0833-41A6-BBD3-AEE2D30B4128}
+		SolutionGuid = {1E53543A-5751-47BD-A7BF-CC1AA12D0D41}
 	EndGlobalSection
 EndGlobal

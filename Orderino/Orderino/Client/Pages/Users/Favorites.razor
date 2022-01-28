@@ -1,0 +1,139 @@
+﻿@page "/favorites/{orderId}/{userId}"
+
+@using Orderino.Shared.DTOs
+@using Orderino.Shared.Models
+@using System.Linq
+
+@inject HttpClient httpClient
+
+
+<div class="menu-items-container-background">
+    <div class="menu-category-header">
+        <h3 class="font" style="color: white; font-weight: 700; max-height: 40px; font-size: 60px;">Your favorites</h3>
+    </div>
+
+    <div class="favorites-container">
+
+        @if (user != null && user.Favorites != null)
+        {
+            @foreach (string category in GetFavoritesCategories())
+            {
+                <div class="menu-category-header">
+                    <h4 class="font" style="color: white; font-weight: 700; max-height: 40px; font-size: 40px;">@category</h4>
+                </div>
+
+                <div class="menu-items-container">
+                    @foreach (OrderItem item in GetFavoritesForCategory(category))
+                    {
+                        <div style="min-height: 460px; max-width: 320px; border-color: #e53333; border-style: solid; border-width: 3px; border-radius: 5px; ">
+                            <div class="font" style="font-size: 20px; color: white; padding-left: 15px; height: 7%; background-color: rgba(229, 51, 51, 1);">
+                                @item.RestaurantName
+                            </div>
+                            <div style="height: 93%; min-height: 420px;">
+                                <MudCard Style="min-height: 420px; height: 100%;">
+                                    <MudCardMedia Image="@item.ImageUrl" Style="height: 50%; min-height: 200px; max-height: 200px;" />
+                                    <MudCardContent Style="height: 40%;">
+                                        <MudText Typo="Typo.h5" Align="Align.Left" Style="color: black;">@item.Name</MudText>
+                                        <MudText Typo="Typo.body2" Style="color: black;">@item.Description</MudText>
+                                    </MudCardContent>
+                                    <MudCardActions Style="position: relative; height: 10%;">
+                                        <div style="position: absolute; padding: 0 10px 0 5px;">
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 2fr; ">
+                                                <MudTextField @bind-Value="item.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense" Style="color: black;"></MudTextField>
+                                                <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Primary" OnClick="() => AddToCart(item)" />
+
+                                                @if (user.Favorites != null && user.Favorites.Any(x => x.Id == item.Id))
+                                                {
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Star" Color="Color.Primary" OnClick="() => RemoveFromFavorites(item)" />
+                                                }
+                                                else
+                                                {
+                                                    <MudIconButton Icon="@Icons.Material.Outlined.Star" Color="Color.Default" OnClick="() => AddToFavorites(item)" />
+                                                }
+
+                                                <div class="item-card-price">
+                                                    <MudText Typo="Typo.h6" Align="Align.Right" Style="flex: 1px; color: black;">@item.Price lei</MudText>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </MudCardActions>
+                                </MudCard>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string userId { get; set; }
+
+    [Parameter]
+    public string orderId { get; set; }
+
+    private const string logoPath = "assets/OrderinoMissingProduct.png";
+    private User user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
+    }
+
+    private async Task AddToCart(OrderItem item)
+    {
+        if (item.Quantity <= 0)
+            return;
+
+        var cartDto = new CartDto
+        {
+            UserId = userId,
+            RestaurantId = item.RestaurantId,
+            OrderItemId = item.Id,
+            Quantity = item.Quantity,
+            OrderId = orderId
+        };
+
+        await httpClient.PostAsJsonAsync($"cart/add", cartDto);
+    }
+
+    private async Task AddToFavorites(OrderItem item)
+    {
+        var favoriteDto = new FavoriteDto
+        {
+            UserId = userId,
+            RestaurantId = item.RestaurantId,
+            OrderItemId = item.Id,
+        };
+
+        await httpClient.PostAsJsonAsync($"favorites/add", favoriteDto);
+    }
+
+    private async Task RemoveFromFavorites(OrderItem item)
+    {
+        var favoriteDto = new FavoriteDto
+        {
+            UserId = userId,
+            RestaurantId = item.RestaurantId,
+            OrderItemId = item.Id,
+        };
+
+        await httpClient.PostAsJsonAsync($"favorites/remove", favoriteDto);
+    }
+
+    private List<string> GetFavoritesCategories()
+    {
+        return user.Favorites?.Select(x => x.MenuCategory).Distinct().ToList();
+    }
+
+    private List<OrderItem> GetFavoritesForCategory(string categoryName)
+    {
+        return user.Favorites?.Where(x => x.MenuCategory == categoryName).ToList();
+    }
+
+}

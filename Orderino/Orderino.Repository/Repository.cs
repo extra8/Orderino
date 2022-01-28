@@ -1,14 +1,14 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
-using Orderino.Repository.Models;
+using Orderino.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Orderino.Repository
+namespace Orderino.Infrastructure
 {
-    public class Repository<T> where T : IEntity
+    public class Repository <T> where T : IEntity
     {
         private CosmosClient cosmosClient;
         private Database database;
@@ -38,7 +38,7 @@ namespace Orderino.Repository
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                var newEntity = await container.CreateItemAsync(entity, new PartitionKey(entity.Id));
+                ItemResponse<T> newEntity = await container.CreateItemAsync(entity, new PartitionKey(entity.Id));
                 return newEntity;
             }
         }
@@ -47,7 +47,7 @@ namespace Orderino.Repository
         {
             var concurrentTasks = new List<Task>();
 
-            foreach (var entity in entities)
+            foreach (T entity in entities)
             {
                 concurrentTasks.Add(container.UpsertItemAsync(entity));
             }
@@ -57,7 +57,7 @@ namespace Orderino.Repository
 
         public async Task<List<T>> QueryAllItemsAsync(List<string> entityIds)
         {
-            var sqlQuery = "SELECT * FROM c WHERE c.id IN (";
+            string sqlQuery = "SELECT * FROM c WHERE c.id IN (";
 
             foreach (string id in entityIds)
             {
@@ -72,7 +72,7 @@ namespace Orderino.Repository
 
         public async Task<List<T>> QueryAllItemsAsync()
         {
-            var sqlQuery = "SELECT * FROM c";
+            string sqlQuery = "SELECT * FROM c";
 
             return await QueryAllItemsAsync(sqlQuery);
         }
@@ -82,9 +82,9 @@ namespace Orderino.Repository
             return await QueryItemAsync(entity.Id);
         }
 
-        public async Task<T> QueryItemAsync(string entityId, bool createEntity = true)
+        public async Task<T> QueryItemAsync(string entityId, bool createEntity = false)
         {
-            try 
+            try
             {
                 return await container.ReadItemAsync<T>(entityId, new PartitionKey(entityId));
             }
@@ -92,20 +92,23 @@ namespace Orderino.Repository
             {
                 if (createEntity)
                 {
-                    var entityType = typeof(T);
-                    var newEntity = (T)Activator.CreateInstance(Type.GetType(entityType.ToString()));
+                    Type entityType = typeof(T);
+                    var x = entityType.AssemblyQualifiedName.ToString();
+                    Type type = Type.GetType(x);
+
+                    var newEntity = (T)Activator.CreateInstance(type);
                     newEntity.Id = entityId;
 
                     return await AddAsync(newEntity);
                 }
 
                 return default;
-            }            
+            }
         }
 
         public async Task<List<T>> QueryByFieldName(string fieldName, string search)
         {
-            var sqlQuery = $"SELECT * FROM c WHERE c.{fieldName} LIKE '%{search}%'";
+            string sqlQuery = $"SELECT * FROM c WHERE c.{fieldName} LIKE '%{search}%'";
 
             return await QueryAllItemsAsync(sqlQuery);
         }
@@ -135,7 +138,7 @@ namespace Orderino.Repository
         }
 
         public async Task Update(T entity)
-        {            
+        {
             await container.ReplaceItemAsync<T>(entity, entity.Id, new PartitionKey(entity.Id));
         }
 
@@ -151,5 +154,5 @@ namespace Orderino.Repository
             database = cosmosClient.GetDatabase(CosmosDbName);
             container = database.GetContainer(CosmosDbContainerName);
         }
-    }    
+    }
 }

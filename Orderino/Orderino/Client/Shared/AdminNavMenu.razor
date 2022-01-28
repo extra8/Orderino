@@ -1,0 +1,77 @@
+﻿@using Orderino.Shared.Models 
+
+@inject HttpClient httpClient
+@inject NavigationManager navigationManager
+
+
+<div class="banner-container">
+    <div class="banner">
+        <div style="display:inline-flex; cursor:pointer;">
+            <a @onclick="@GetNavigationUrl">
+                <img src="@logoPath" style="width:60px;">
+            </a>
+
+            <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="@GetNavigationUrl">
+                Orderino
+            </NavLink>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private const string logoPath = "assets/OrderinoLogo.png";
+
+    private string navigateToUrl;
+    private string currentUrl;
+
+    protected async Task GetNavigationUrl()
+    {
+        currentUrl = navigationManager.Uri.ToString();
+
+        navigateToUrl = "admin-login";
+
+        if (currentUrl.Contains("/edit-restaurant/"))
+        {
+            int startIndex = currentUrl.IndexOf("/edit-restaurant/") + "/edit-restaurant/".Count();
+            string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+
+            LoginInfo dbToken = await httpClient.GetFromJsonAsync<LoginInfo>($"login/{token}");
+            if (dbToken != null && dbToken.TokenExpiration >= DateTime.UtcNow)
+            {
+                navigateToUrl = $"admin-restaurants/{token}";
+            }
+        }
+
+        if (currentUrl.Contains("/admin-restaurants/"))
+        {
+            int startIndex = currentUrl.IndexOf("/admin-restaurants/") + "/admin-restaurants/".Count();
+            string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+
+            LoginInfo dbToken = await httpClient.GetFromJsonAsync<LoginInfo>($"login/{token}");
+            if (dbToken != null && dbToken.TokenExpiration >= DateTime.UtcNow)
+            {
+                navigateToUrl = $"admin-restaurants/{token}";
+            }
+        }
+
+        if (currentUrl.Contains("/restaurant-statistics/"))
+        {
+            int startIndex = currentUrl.IndexOf("/restaurant-statistics/") + "/restaurant-statistics/".Count();
+            string token = currentUrl.Substring(currentUrl.LastIndexOf("/") + 1);
+
+            LoginInfo dbToken = await httpClient.GetFromJsonAsync<LoginInfo>($"login/{token}");
+            if (dbToken != null && dbToken.TokenExpiration >= DateTime.UtcNow)
+            {
+                navigateToUrl = $"admin-restaurants/{token}";
+            }
+        }
+
+        if (currentUrl.Contains("/history/"))
+            navigateToUrl = currentUrl;
+
+        navigationManager.NavigateTo(navigateToUrl, forceLoad: true);
+    }
+
+}

@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orderino.Infrastructure;
+using Orderino.Infrastructure.AzureBlob;
+using Orderino.Infrastructure.AzureBlob.Interfaces;
 using Orderino.Infrastructure.EntityServices;
 using Orderino.Infrastructure.EntityServices.Interfaces;
 using Orderino.Infrastructure.Services;
@@ -72,17 +74,6 @@ namespace Orderino.Server
 
         private void RegisterServices(IServiceCollection services)
         {
-            IConfigurationSection cosmosDbConfigurationSection = Configuration.GetSection(cosmosDbConfigurationSectionKey);
-            services.AddSingleton(new Repository<User>(cosmosDbConfigurationSection));
-            services.AddSingleton(new Repository<Restaurant>(cosmosDbConfigurationSection));
-            services.AddSingleton(new Repository<Order>(cosmosDbConfigurationSection));
-            services.AddSingleton(new Repository<FinalizedOrder>(cosmosDbConfigurationSection));
-            services.AddSingleton(new Repository<LoginInfo>(cosmosDbConfigurationSection));
-            services.AddSingleton(new Repository<RestaurantStatistic>(cosmosDbConfigurationSection));
-        }
-
-        private void RegisterRepositories(IServiceCollection services)
-        {
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRestaurantService, RestaurantService>();
             services.AddScoped<IOrderService, OrderService>();
@@ -95,6 +86,20 @@ namespace Orderino.Server
             services.AddScoped<IFavoritesService, FavoritesService>();
             services.AddScoped<IOrderHistoryService, OrderHistoryService>();
             services.AddScoped<IRestaurantAdministrationService, RestaurantAdministrationService>();
+
+            services.AddScoped<IAzureBlobUploadService, AzureBlobUploadService>();
+            services.AddSingleton<IAzureBlobConnectionFactory, AzureBlobConnectionFactory>();            
+        }
+
+        private void RegisterRepositories(IServiceCollection services)
+        {
+            IConfigurationSection cosmosDbConfigurationSection = Configuration.GetSection(cosmosDbConfigurationSectionKey);
+            services.AddSingleton(new Repository<User>(cosmosDbConfigurationSection));
+            services.AddSingleton(new Repository<Restaurant>(cosmosDbConfigurationSection));
+            services.AddSingleton(new Repository<Order>(cosmosDbConfigurationSection));
+            services.AddSingleton(new Repository<FinalizedOrder>(cosmosDbConfigurationSection));
+            services.AddSingleton(new Repository<LoginInfo>(cosmosDbConfigurationSection));
+            services.AddSingleton(new Repository<RestaurantStatistic>(cosmosDbConfigurationSection));
         }
     }
 }

@@ -20,7 +20,7 @@
             {
                 <div class="restaurant-banner">
                     <div style="width: 100%; height: 83%; ">
-                        <img src="@restaurant.BannerUrl" class="restaurant-banner-photo" @onclick="() => OpenRestaurant(restaurant)">
+                        <img src="@GetImage(restaurant.BannerUrl)" class="restaurant-banner-photo" @onclick="() => OpenRestaurant(restaurant)">
                     </div>
                     <div class="restaurant-text font" @onclick="() => OpenRestaurant(restaurant)">
                         @restaurant.Name
@@ -40,6 +40,8 @@
     [Parameter]
     public string orderId { get; set; }
 
+    private const string logoPath = "assets/OrderinoMissingBanner.png";
+
     List<Restaurant> restaurants = new List<Restaurant>();
     User user;
 
@@ -52,7 +54,7 @@
 
         string route = "restaurant/all-basic";
         if (!string.IsNullOrWhiteSpace(search))
-            route = route + $"/{search}";        
+            route = route + $"/{search}";
 
         restaurants = await httpClient.GetFromJsonAsync<List<Restaurant>>(route);
     }
@@ -61,6 +63,14 @@
     {
         string route = $"/restaurant/{orderId}/{restaurant.Id}/{userId}";
         navigationManager.NavigateTo(route);
+    }
+
+    private string GetImage(string imageUrl)
+    {
+        if (string.IsNullOrEmpty(imageUrl))
+            return logoPath;
+
+        return imageUrl;
     }
 
 }

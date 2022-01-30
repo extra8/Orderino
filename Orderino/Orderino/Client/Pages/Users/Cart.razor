@@ -213,6 +213,7 @@
         };
 
         await httpClient.PostAsJsonAsync("cart/remove", cartDto);
+        order = await httpClient.GetFromJsonAsync<Order>($"order/{orderId}");
     }
 
     private async Task ModifyOrder(SelectedOrderItem orderItem)
@@ -227,6 +228,7 @@
         };
 
         await httpClient.PostAsJsonAsync("cart/modify", cartDto);
+        order = await httpClient.GetFromJsonAsync<Order>($"order/{orderId}");
     }
 
     private async Task FinalizeOrder()

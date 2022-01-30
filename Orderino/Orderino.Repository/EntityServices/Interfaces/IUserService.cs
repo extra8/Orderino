@@ -1,4 +1,5 @@
-﻿using Orderino.Shared.Models;
+﻿using Orderino.Shared.DTOs;
+using Orderino.Shared.Models;
 using System.Threading.Tasks;
 
 namespace Orderino.Infrastructure.EntityServices.Interfaces
@@ -8,5 +9,7 @@ namespace Orderino.Infrastructure.EntityServices.Interfaces
         Task<User> Get(string userId);
 
         Task Update(User modifiedUser);
+
+        Task AddToRecent(RecentDto modifiedUser);
     }
 }

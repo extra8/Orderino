@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Orderino.Infrastructure.EntityServices.Interfaces;
+using Orderino.Shared.DTOs;
 using Orderino.Shared.Models;
 using System.Threading.Tasks;
 
@@ -27,6 +28,13 @@ namespace Orderino.Server.Controllers.EntityControllers
         public async Task<IActionResult> Update([FromBody] User modifiedUser)
         {
             await userService.Update(modifiedUser);
+            return Ok();
+        }
+
+        [HttpPost("recent")]
+        public async Task<IActionResult> AddToRecent([FromBody] RecentDto recentDto)
+        {
+            await userService.AddToRecent(recentDto);
             return Ok();
         }
     }

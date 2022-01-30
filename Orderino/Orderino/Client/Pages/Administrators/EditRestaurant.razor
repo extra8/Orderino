@@ -4,6 +4,7 @@
 @using Orderino.Shared.Models;
 @using BlazorInputFile;
 @using System.IO;
+@using System.Net.Http
 @using System.Text.Json
 
 @inject HttpClient httpClient
@@ -100,7 +101,7 @@
                                 {
                                     @foreach (var category in restaurant.MenuCategories)
                                     {
-                                        
+
                                         if (category == menuItem.MenuCategory)
                                         {
                                             <option class="font" value="@category" selected>@category</option>
@@ -165,7 +166,7 @@
         {
             _menuCategories = value;
 
-            if(restaurant != null)
+            if (restaurant != null)
                 restaurant.MenuCategories = SplitMenuCategories();
         }
     }
@@ -198,10 +199,19 @@
 
         restaurant = await httpClient.GetFromJsonAsync<Restaurant>($"restaurant/{restaurantId}");
 
-        if (restaurant?.MenuCategories == null)
-            restaurant.MenuCategories = new List<string>();
+        if (restaurant?.MenuCategories == null || restaurant?.MenuCategories.Count == 0)
+        {
+            if (restaurant.Menu != null && restaurant.Menu.Count > 0)
+            {
+                restaurant.MenuCategories = restaurant.Menu.Where(x => !string.IsNullOrEmpty(x.MenuCategory)).Select(x => x.MenuCategory.Trim()).Distinct().ToList();
+            }
+            else
+            {
+                restaurant.MenuCategories = new List<string>();
+            }
+        }
 
-        menuCategories = string.Join("; ", restaurant.MenuCategories);
+        menuCategories = string.Join("; ", restaurant.MenuCategories.Where(x => !string.IsNullOrEmpty(x)));
     }
 
     private async Task SaveChanges()
@@ -221,12 +231,29 @@
 
     private async Task UploadBanner(IFileListEntry[] e)
     {
-        restaurant.BannerUrl = await ProcessImage(e);
+        string imageData = await ProcessImage(e);
+
+        var response = await httpClient.PostAsJsonAsync("upload-banner", imageData);
+
+        response.EnsureSuccessStatusCode();
+        string content = await response.Content.ReadAsStringAsync();
+        ImageDto imageDto = JsonSerializer.Deserialize<ImageDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        restaurant.BannerUrl = imageDto.ImageUrl;
     }
 
     private async Task UploadMenuItemPicture(IFileListEntry[] e, OrderItem menuItem)
     {
-        menuItem.ImageUrl = await ProcessImage(e);
+        string imageData = await ProcessImage(e);
+
+        var response = await httpClient.PostAsJsonAsync("upload-image", imageData);
+
+        response.EnsureSuccessStatusCode();
+        string content = await response.Content.ReadAsStringAsync();
+        ImageDto imageDto = JsonSerializer.Deserialize<ImageDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        var itemsToAddImage = restaurant.Menu.Where(x => x.Id == menuItem.Id).ToList();
+        itemsToAddImage.ForEach(x => x.ImageUrl = imageDto.ImageUrl);
     }
 
     private async Task<string> ProcessImage(IFileListEntry[] e)
@@ -235,12 +262,12 @@
 
         if (image == null)
         {
-            return null;
+            return string.Empty;
         }
 
         var ms = new MemoryStream();
         await image.Data.CopyToAsync(ms);
-        var imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
+        var imageDataUrl = Convert.ToBase64String(ms.ToArray());
 
         return imageDataUrl;
     }
@@ -272,7 +299,7 @@
         if (string.IsNullOrEmpty(menuCategories))
             return new List<string>();
 
-        List<string> categories = menuCategories.Split(';').Select(x => x.Trim()).ToList();
+        List<string> categories = menuCategories.Split(';').Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Trim()).ToList();
 
         return categories;
     }

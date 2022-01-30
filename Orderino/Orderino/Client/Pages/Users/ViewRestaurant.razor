@@ -94,38 +94,34 @@
     protected override async Task OnInitializedAsync()
     {
         restaurant = await httpClient.GetFromJsonAsync<Restaurant>($"restaurant/{restaurantId}");
+
+        await AddToUserRecents();
+
         user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
-
-        AddToUserRecents();
-
-        await httpClient.PostAsJsonAsync<User>($"user", user);
     }
 
-    private void AddToUserRecents()
+    private async Task AddToUserRecents()
     {
-        if (user.RecentRestaurantIds == null)
-            user.RecentRestaurantIds = new List<string>();
-
-        if (user.RecentRestaurantIds.Contains(restaurantId))
-            user.RecentRestaurantIds.Remove(restaurantId);
-
-        user.RecentRestaurantIds.Add(restaurantId);
-
-        if (user.RecentRestaurantIds.Count > 7)
+        var recentDto = new RecentDto
         {
-            int numberToRemove = user.RecentRestaurantIds.Count - 7;
-            user.RecentRestaurantIds = user.RecentRestaurantIds.Skip(numberToRemove).Take(7).ToList();
-        }
+            UserId = userId,
+            RestaurantId = restaurantId
+        };
+
+        await httpClient.PostAsJsonAsync<RecentDto>($"recent", recentDto);
     }
 
     private List<string> GetMenuCategories()
     {
         List<string> categories = restaurant.Menu.Select(x => x.MenuCategory).Distinct().ToList();
 
-        var intersectedItems = restaurant.MenuCategories.Intersect(categories);
-        var notIntersectedItems = categories.Except(restaurant.MenuCategories);
+        if (restaurant.MenuCategories != null && restaurant.MenuCategories.Count > 0)
+        {
+            var intersectedItems = restaurant.MenuCategories.Intersect(categories);
+            var notIntersectedItems = categories.Except(restaurant?.MenuCategories);
 
-        categories = intersectedItems.Concat(notIntersectedItems).ToList();
+            categories = intersectedItems.Concat(notIntersectedItems).ToList();
+        }
 
         return categories;
     }
@@ -162,6 +158,7 @@
         };
 
         await httpClient.PostAsJsonAsync($"favorites/add", favoriteDto);
+        user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
     }
 
     private async Task RemoveFromFavorites(OrderItem item)
@@ -174,6 +171,7 @@
         };
 
         await httpClient.PostAsJsonAsync($"favorites/remove", favoriteDto);
+        user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
     }
 
     private string GetImage(string imageUrl)

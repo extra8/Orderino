@@ -112,6 +112,7 @@
         };
 
         await httpClient.PostAsJsonAsync($"favorites/add", favoriteDto);
+        user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
     }
 
     private async Task RemoveFromFavorites(OrderItem item)
@@ -124,6 +125,7 @@
         };
 
         await httpClient.PostAsJsonAsync($"favorites/remove", favoriteDto);
+        user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
     }
 
     private List<string> GetFavoritesCategories()

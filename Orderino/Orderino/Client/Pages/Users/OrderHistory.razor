@@ -194,6 +194,7 @@
         };
 
         await httpClient.PostAsJsonAsync("reorder", reorderDto);
+        navigationManager.NavigateTo($"cart/{orderId}/{userId}", forceLoad: true);
     }
 
 }

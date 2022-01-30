@@ -49,9 +49,10 @@ namespace Orderino.Infrastructure.Services
             restaurantDto.Restaurant.Menu.RemoveAll(x => string.IsNullOrEmpty(x.Name) || string.IsNullOrEmpty(x.MenuCategory));
 
             loginInfo.Restaurants.First(x => x.RestaurantId == restaurant.Id).RestaurantName = restaurantDto.Restaurant.Name;
-            loginInfo.Restaurants.First(x => x.RestaurantId == restaurant.Id).BannerUrl = restaurantDto.Restaurant.Name;
+            loginInfo.Restaurants.First(x => x.RestaurantId == restaurant.Id).BannerUrl = restaurantDto.Restaurant.BannerUrl;
 
             restaurant = restaurantDto.Restaurant;
+            restaurant.MenuCategories.RemoveAll(x => string.IsNullOrEmpty(x));
 
             await restaurantRepository.Update(restaurant);
             await loginInfoRepository.Update(loginInfo);

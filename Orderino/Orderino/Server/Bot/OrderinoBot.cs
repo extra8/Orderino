@@ -35,7 +35,7 @@ namespace Orderino.Server.Bot
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            string welcomeText = "Hello and welcome!";
+            string welcomeText = "Hello and welcome! How about a snack?";
 
             await turnContext.SendActivityAsync(MessageFactory.Text(welcomeText, welcomeText), cancellationToken);
         }
@@ -44,49 +44,46 @@ namespace Orderino.Server.Bot
         {
             try
             {
-                await StoreUsers(turnContext, cancellationToken);
-
-                string command = turnContext.Activity.Text.Trim().Split(' ').Last().ToLower();
                 var helpCard = new HelpCard();
 
-                switch (command)
+                await StoreUsers(turnContext, cancellationToken);
+
+                string[] inputArray = turnContext.Activity.Text.Trim().Split(' ');                
+
+                if (inputArray.Length > 2)
                 {
-                    case "help":
-                        logger.LogInformation("Sending a help card");
-                        await helpCard.SendHelpCard(turnContext, cancellationToken);
-                        break;
-
-                    case "order":
-                        Order order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id);
-                        if (order.Initiator == null)
-                        {
-                            User user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
-                            order.Initiator = user;
-                            order.Initiator.Favorites = null;
-
-                            if (turnContext.Activity.Conversation.ConversationType == "personal")
-                                order.OrderType = OrderType.Personal;
-                            else
-                                order.OrderType = OrderType.Group;
-
-                            await orderRepository.Update(order);
-                        }
-                        logger.LogInformation("Sending an order card");
-                        var orderCard = new OrderCard();
-                        await orderCard.SendOrderCard(turnContext, cancellationToken);
-                        break;
-
-                    case "history":
-                        logger.LogInformation("Sending a history card");
-                        var historyCard = new HistoryCard();
-                        await historyCard.SendHistoryCard(turnContext, cancellationToken);
-                        break;
-
-                    default:
-                        logger.LogInformation("Sending a loading card");
-                        await helpCard.SendHelpCard(turnContext, cancellationToken);
-                        break;
+                    logger.LogInformation("Sending a help card");
+                    await helpCard.SendHelpCard(turnContext, cancellationToken);
                 }
+                else
+                {
+                    string command = inputArray.Last().ToLower();
+                    switch (command)
+                    {
+                        case "help":
+                            logger.LogInformation("Sending a help card");
+                            await helpCard.SendHelpCard(turnContext, cancellationToken);
+                            break;
+
+                        case "order":
+                            await CreateOrderForConversation(turnContext);
+                            logger.LogInformation("Sending an order card");
+                            var orderCard = new OrderCard();
+                            await orderCard.SendOrderCard(turnContext, cancellationToken);
+                            break;
+
+                        case "history":
+                            logger.LogInformation("Sending a history card");
+                            var historyCard = new HistoryCard();
+                            await historyCard.SendHistoryCard(turnContext, cancellationToken);
+                            break;
+
+                        default:
+                            logger.LogInformation("Sending a help card");
+                            await helpCard.SendHelpCard(turnContext, cancellationToken);
+                            break;
+                    }
+                }                
             }
             catch (Exception ex)
             {
@@ -110,6 +107,38 @@ namespace Orderino.Server.Bot
                 logger.LogError(ex, "An error has occured!", turnContext);
                 throw;
             }
+        }       
+
+        private async Task<InvokeResponse> ResponseToButtonClick(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {   
+            try
+            {
+                var data = ((dynamic)turnContext.Activity.Value).data.data.ToString();
+                ActionButton action = JsonConvert.DeserializeObject<ActionButton>(data);
+                TaskModuleType moduleType = TaskModuleType.Help;
+
+                switch (action.Type)
+                {
+                    case "help":
+                        moduleType = TaskModuleType.Help;
+                        break;
+
+                    case "order":
+                        moduleType = TaskModuleType.Order;
+                        break;
+
+                    case "history":
+                        moduleType = TaskModuleType.History;
+                        break;
+                }
+
+                await CreateOrderForConversation(turnContext);
+                return TaskModuleFactory.GetTaskModule(moduleType, turnContext, configuration);
+            }
+            catch
+            {
+                return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
+            }            
         }
 
         private async Task StoreUsers(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
@@ -136,53 +165,11 @@ namespace Orderino.Server.Bot
             await userRepository.BulkAddAsync(users);
         }
 
-        private async Task<InvokeResponse> ResponseToButtonClick(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
-        {
-            var data = ((dynamic) turnContext.Activity.Value).data.data.ToString();
-            ActionButton action = JsonConvert.DeserializeObject<ActionButton>(data);
-
-            switch (action.Type)
-            {
-                case "help":
-                    return GetHelpTaskModule(turnContext, cancellationToken);
-
-                case "order":
-                    return await GetOrderTaskModule(turnContext, cancellationToken);
-
-                case "history":
-                    return GetHistoryTaskModule(turnContext, cancellationToken);
-            }
-
-            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
-        }
-
-        private InvokeResponse GetHelpTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
-        {
-            var taskModule = new TaskModuleTaskInfo
-            {
-                Url = configuration["BaseUrl"],
-                FallbackUrl = configuration["BaseUrl"],
-                Title = "Orderino",
-                Width = 1600,
-                Height = 900,
-                CompletionBotId = configuration["MicrosoftAppId"]
-            };
-
-            var tmContinueResponse = new TaskModuleContinueResponse(taskModule);
-            var tmResponse = new TaskModuleResponse(tmContinueResponse);
-            var invokeResponse = new InvokeResponse
-            {
-                Body = tmResponse,
-                Status = 200
-            };
-
-            return invokeResponse;
-        }
-
-        private async Task<InvokeResponse> GetOrderTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        private async Task CreateOrderForConversation(ITurnContext turnContext)
         {
             Order order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id);
-            if (order.Initiator == null)
+
+            if (order == null || order?.Initiator == null)
             {
                 User user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
                 order.Initiator = user;
@@ -195,49 +182,6 @@ namespace Orderino.Server.Bot
 
                 await orderRepository.Update(order);
             }
-
-            var taskModule = new TaskModuleTaskInfo
-            {
-                Url = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
-                FallbackUrl = configuration["BaseUrl"] + $"/restaurant-browser/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
-                Title = "Orderino",
-                Width = 1600,
-                Height = 900,
-                CompletionBotId = configuration["MicrosoftAppId"]
-            };
-
-            var tmContinueResponse = new TaskModuleContinueResponse(taskModule);
-            var tmResponse = new TaskModuleResponse(tmContinueResponse);
-            var invokeResponse = new InvokeResponse
-            {
-                Body = tmResponse,
-                Status = 200
-            };
-
-            return invokeResponse;
-        }
-
-        private InvokeResponse GetHistoryTaskModule(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
-        {
-            var taskModule = new TaskModuleTaskInfo
-            {
-                Url = configuration["BaseUrl"] + $"/history/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
-                FallbackUrl = configuration["BaseUrl"] + $"/history/{turnContext.Activity.Conversation.Id}/{turnContext.Activity.From.AadObjectId}",
-                Title = "Orderino",
-                Width = 1600,
-                Height = 900,
-                CompletionBotId = configuration["MicrosoftAppId"]
-            };
-
-            var tmContinueResponse = new TaskModuleContinueResponse(taskModule);
-            var tmResponse = new TaskModuleResponse(tmContinueResponse);
-            var invokeResponse = new InvokeResponse
-            {
-                Body = tmResponse,
-                Status = 200
-            };
-
-            return invokeResponse;
         }
     }
 }

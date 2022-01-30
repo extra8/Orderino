@@ -31,15 +31,15 @@
                             </div>
                             <div style="height: 93%; min-height: 420px;">
                                 <MudCard Style="min-height: 420px; height: 100%;">
-                                    <MudCardMedia Image="@item.ImageUrl" Style="height: 50%; min-height: 200px; max-height: 200px;" />
+                                    <MudCardMedia Image="@GetImage(item.ImageUrl)" Style="height: 50%; min-height: 200px; max-height: 200px;" />
                                     <MudCardContent Style="height: 40%;">
-                                        <MudText Typo="Typo.h5" Align="Align.Left" Style="color: black;">@item.Name</MudText>
-                                        <MudText Typo="Typo.body2" Style="color: black;">@item.Description</MudText>
+                                        <MudText Typo="Typo.h5" Align="Align.Left" Style="color: black;" Class="font">@item.Name</MudText>
+                                        <MudText Typo="Typo.body2" Style="color: black;" Class="font">@item.Description</MudText>
                                     </MudCardContent>
                                     <MudCardActions Style="position: relative; height: 10%;">
                                         <div style="position: absolute; padding: 0 10px 0 5px;">
                                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 2fr; ">
-                                                <MudTextField @bind-Value="item.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense" Style="color: black;"></MudTextField>
+                                                <MudTextField @bind-Value="item.Quantity" Variant="Variant.Outlined" Margin="Margin.Dense" Style="color: black;" Class="font"></MudTextField>
                                                 <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Primary" OnClick="() => AddToCart(item)" />
 
                                                 @if (user.Favorites != null && user.Favorites.Any(x => x.Id == item.Id))
@@ -52,7 +52,7 @@
                                                 }
 
                                                 <div class="item-card-price">
-                                                    <MudText Typo="Typo.h6" Align="Align.Right" Style="flex: 1px; color: black;">@item.Price lei</MudText>
+                                                    <MudText Typo="Typo.h6" Align="Align.Right" Style="flex: 1px; color: black;" Class="font">@item.Price lei</MudText>
                                                 </div>
                                             </div>
                                         </div>
@@ -128,12 +128,23 @@
 
     private List<string> GetFavoritesCategories()
     {
-        return user.Favorites?.Select(x => x.MenuCategory).Distinct().ToList();
+        List<string> categories = user.Favorites?.Select(x => x.MenuCategory).Distinct().ToList();
+        categories.Sort();
+
+        return categories;
     }
 
     private List<OrderItem> GetFavoritesForCategory(string categoryName)
     {
         return user.Favorites?.Where(x => x.MenuCategory == categoryName).ToList();
+    }
+
+    private string GetImage(string imageUrl)
+    {
+        if (string.IsNullOrEmpty(imageUrl))
+            return logoPath;
+
+        return imageUrl;
     }
 
 }

@@ -50,7 +50,7 @@
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out StringValues search);
 
-        string route = "restaurant/all";
+        string route = "restaurant/all-basic";
         if (!string.IsNullOrWhiteSpace(search))
             route = route + $"/{search}";        
 

@@ -43,9 +43,9 @@
                 <MudCard Style="background-color: rgba(0, 0, 0);">
                     <MudCardContent>
                         <MudText Typo="Typo.h5" Style="color: white; font-size: 30px;" Class="font" Align="Align.Left">@restaurantStatistic.Name</MudText>
-                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurantStatistic.Address.ToString()</MudText>
-                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurantStatistic.Phone</MudText>
-                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;">@restaurantStatistic.Email</MudText>
+                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;" Class="font">@restaurantStatistic.Address.ToString()</MudText>
+                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;" Class="font">@restaurantStatistic.Phone</MudText>
+                        <MudText Typo="Typo.body1" Style="font-weight: bold; color: #e74444;" Class="font">@restaurantStatistic.Email</MudText>
                     </MudCardContent>
                 </MudCard>
             </div>
@@ -76,16 +76,16 @@
             </div>
         </div>
 
-        <div style=" padding-top: 40px; margin-bottom: 20px;">
+        <div style="padding-top: 40px; margin-bottom: 20px;">
             <h2 class="font" style="color: white; font-size: 30px;">Product sales</h2>
             <div style="margin-left: 35%; padding: 10px 0 10px 0; display: table-cell; ">
-                <select style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 20vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedMenuItemId">
-                    <option value=""></option>
+                <select class="font" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 20vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedMenuItemId">
+                    <option class="font" value=""></option>
                     @if (restaurantStatistic != null)
                     {
                         @foreach (var menuItem in restaurantStatistic.HistoricalMenu)
                         {
-                            <option value="@menuItem.Id">@menuItem.Name</option>
+                            <option class="font" value="@menuItem.Id">@menuItem.Name</option>
                         }
                     }
                 </select>
@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <div style=" padding-top: 40px; margin-bottom: 20px; ">
+        <div style="padding-top: 40px; margin-bottom: 20px;">
             <h2 class="font" style="color: white; font-size: 30px;">Income</h2>
             <div style="padding: 40px; background-color: rgba(255, 255, 255); border-radius: 10px;">
                 <MudChart ChartType="ChartType.Line" ChartSeries="@incomeSeries" @bind-SelectedIndex="index4" XAxisLabels="@labels" Width="100%" Height="350px"></MudChart>
@@ -201,8 +201,16 @@
             productSales[product] = dates;
         }
 
-        startDate = restaurantStatistic.History.Select(x => x.TimeStamp).Min().Date;
-        endDate = restaurantStatistic.History.Select(x => x.TimeStamp).Max().Date;
+        if (restaurantStatistic.History.Any())
+        {
+            startDate = restaurantStatistic.History.Select(x => x.TimeStamp).Min().Date;
+            endDate = restaurantStatistic.History.Select(x => x.TimeStamp).Max().Date;
+        }
+        else
+        {
+            startDate = DateTime.UtcNow;
+            endDate = DateTime.UtcNow;
+        }
 
         CalculateStatistics();
     }

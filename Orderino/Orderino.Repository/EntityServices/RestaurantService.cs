@@ -28,6 +28,20 @@ namespace Orderino.Infrastructure.EntityServices
             return await restaurantRepository.QueryAllItemsAsync();
         }
 
+        public async Task<List<Restaurant>> GetAllBasic(string search = null)
+        {
+            List<Restaurant> restaurants;
+
+            if (!string.IsNullOrEmpty(search))
+                restaurants = await restaurantRepository.QueryByFieldName("Name", search);
+
+            restaurants = await restaurantRepository.QueryAllItemsAsync();
+
+            restaurants.ForEach(x => x.Menu = null);
+
+            return restaurants;
+        }
+
         public async Task Update(Restaurant modifiedRestaurant)
         {
             if (modifiedRestaurant == null)

@@ -8,16 +8,18 @@ namespace Orderino.Shared.Models
 
         public string Name { get; set; }
 
-        public string Email { get; set; }
-
-        public string Phone { get; set; }
+        public string Description { get; set; }
 
         public Address Address { get; set; }
 
-        public List<OrderItem> Menu { get; set; }
+        public string Phone { get; set; }
 
-        public string Description { get; set; }
+        public string Email { get; set; }
 
         public string BannerUrl { get; set; }
+
+        public List<string> MenuCategories { get; set; }
+
+        public List<OrderItem> Menu { get; set; }        
     }
 }

@@ -24,26 +24,26 @@
     <div style="@showReorderStyle">
 
         <div style="padding-top: 12px; padding-right: 30px;">
-            <select style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 28vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedOrderId">
-                <option value=""></option>
+            <select class="font" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 28vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedOrderId">
+                <option class="font" value=""></option>
                 @if (finalizedOrder != null && finalizedOrder.Orders != null)
                 {
                     @foreach (var order in finalizedOrder.Orders)
                     {
-                        <option value="@order.FinalizedId">@order.FinalizedTime?.ToString("dddd, dd MMMM yyyy HH:mm")</option>
+                        <option class="font" value="@order.FinalizedId">@order.FinalizedTime?.ToString("dddd, dd MMMM yyyy HH:mm")</option>
                     }
                 }
             </select>
         </div>
 
         <div style="">
-            <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="ViewOrder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">View</button>
+            <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="ViewOrder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">View</button>
         </div>
 
         @if (showReorder)
         {
             <div style="">
-                <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="Reorder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Reorder</button>
+                <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="Reorder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Reorder</button>
             </div>
         }
     </div>

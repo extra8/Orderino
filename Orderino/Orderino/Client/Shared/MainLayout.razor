@@ -54,14 +54,13 @@
     protected override void OnInitialized()
     {
         string uri = navigationManager.Uri.ToString();
-        int count = uri.Split('/').Length - 1;
 
         showAdminNavMenu = uri.Contains("restaurant-management") ||
                            uri.Contains("admin-login") ||
                            uri.Contains("admin-restaurants") ||
                            uri.Contains("restaurant-statistics");
 
-        showSimpleNavMenu = uri.Contains("history") || count == 3;
+        showSimpleNavMenu = uri.Contains("history");
     }
 
 

@@ -10,7 +10,18 @@
 
         public override string ToString()
         {
-            return $"{Line1}, {Line2}, {City}";
+            string address = "";
+
+            if (!string.IsNullOrEmpty(Line1))
+                address = Line1;
+
+            if (!string.IsNullOrEmpty(Line2))
+                address += $", {Line2}";
+
+            if (!string.IsNullOrEmpty(City))
+                address += $", {City}";
+
+            return address;
         }
     }
 }

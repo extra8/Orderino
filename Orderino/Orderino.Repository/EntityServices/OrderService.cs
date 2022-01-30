@@ -15,7 +15,7 @@ namespace Orderino.Infrastructure.EntityServices
 
         public async Task<Order> Get(string orderId)
         {
-            return await orderRepository.QueryItemAsync(orderId, true); ///////////// scos true
+            return await orderRepository.QueryItemAsync(orderId, true);  ///////////// scos true
         }
 
         public async Task Update(Order modifiedOrder)

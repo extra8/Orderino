@@ -11,5 +11,7 @@ namespace Orderino.Infrastructure.EntityServices.Interfaces
         Task Update(Restaurant modifiedRestaurant);
 
         Task<List<Restaurant>> GetAll(string search = null);
+
+        Task<List<Restaurant>> GetAllBasic(string search = null);
     }
 }

@@ -15,7 +15,7 @@ namespace Orderino.Infrastructure.EntityServices
 
         public async Task<User> Get(string userId)
         {
-            return await userRepository.QueryItemAsync(userId);
+            return await userRepository.QueryItemAsync(userId, true);  ///////////// scos true
         }
 
         public async Task Update(User modifiedUser)

@@ -32,6 +32,14 @@ namespace Orderino.Server.Controllers.EntityControllers
             return Ok(result);
         }
 
+        [HttpGet("all-basic/{search}")]
+        [HttpGet("all-basic")]
+        public async Task<IActionResult> GetAllBasic(string search = null)
+        {
+            List<Restaurant> result = await restaurantService.GetAllBasic(search);
+            return Ok(result);
+        }
+
         [HttpPost("")]
         public async Task<IActionResult> Update([FromBody] Restaurant modifiedRestaurant)
         {

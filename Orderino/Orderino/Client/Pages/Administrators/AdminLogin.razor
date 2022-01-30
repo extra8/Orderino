@@ -24,23 +24,23 @@
                                 <h2 class="fw-bold mb-2 font" style="color: #e74444; font-size: 60px; display: inline-flex; vertical-align: middle; padding-left: 15px;">Orderino</h2>
                             </div>
 
-                            <p class="mb-5" style="color:white;">Manage your restaurants!</p>
+                            <p class="mb-5 font" style="color:white;">Manage your restaurants!</p>
 
                             <div class="form-outline form-white mb-4">
-                                <input type="email" class="form-control form-control-lg" placeholder="Email" @bind="username" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; font-size: 20px; padding: 10px; color: white;" />
+                                <input type="email" class="form-control form-control-lg font" placeholder="Email" @bind="username" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; font-size: 20px; padding: 10px; color: white;" />
                             </div>
 
                             <div class="form-outline form-white mb-4">
-                                <input type="password" class="form-control form-control-lg" placeholder="Password" @bind="password" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; font-size: 20px; padding: 10px; color: white;" />
+                                <input type="password" class="form-control form-control-lg font" placeholder="Password" @bind="password" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; font-size: 20px; padding: 10px; color: white;" />
                             </div>
 
-                            <p class="small mb-5 pb-lg-2"><a href="#!" style="color: white !important;">Forgot password?</a></p>
+                            <p class="small mb-5 pb-lg-2 font"><a href="#!" class="font" style="color: white !important;">Forgot password?</a></p>
 
-                            <button class="btn btn-outline-light btn-lg px-5" type="submit" @onclick="Authenticate" style="color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Login</button>
+                            <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="Authenticate" style="color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Login</button>
 
                         </div>
                         <div>
-                            <p class="mb-0">Don't have an account? <a href="#!" class="fw-bold" style="color:#e74444;">Get in touch</a></p>
+                            <p class="mb-0 font">Don't have an account? <a href="#!" class="fw-bold" style="color:#e74444;">Get in touch</a></p>
                         </div>
 
                     </div>
@@ -69,13 +69,19 @@
             Password = password
         };
 
-        var response = await httpClient.PostAsJsonAsync("authenticate", authDto);
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("authenticate", authDto);
 
-        response.EnsureSuccessStatusCode();
-        string content = await response.Content.ReadAsStringAsync();
-        LoginInfo loginInfo = JsonSerializer.Deserialize<LoginInfo>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            response.EnsureSuccessStatusCode();
+            string content = await response.Content.ReadAsStringAsync();
+            LoginInfo loginInfo = JsonSerializer.Deserialize<LoginInfo>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        navigationManager.NavigateTo($"/admin-restaurants/{loginInfo.Token}");
+            navigationManager.NavigateTo($"/admin-restaurants/{loginInfo.Token}");
+        }
+        catch (Exception ex)
+        {
+        }
     }
 
 }

@@ -20,6 +20,12 @@ namespace Orderino.Infrastructure.Services
 
         public async Task<Restaurant> EditRestaurant(ModifyRestaurantDto restaurantDto)
         {
+            if (restaurantDto.Restaurant.Menu.Any(x => string.IsNullOrEmpty(x.MenuCategory)))
+                return null;
+
+            if (restaurantDto.Restaurant.Menu.Any(x => string.IsNullOrEmpty(x.Name)))
+                return null;
+
             LoginInfo loginInfo = (await loginInfoRepository.QueryByFieldName("Token", restaurantDto.Token)).FirstOrDefault();
 
             bool hasAccessToRestaurant = loginInfo.Restaurants.Select(x => x.RestaurantId).Contains(restaurantDto.Restaurant.Id);
@@ -33,7 +39,7 @@ namespace Orderino.Infrastructure.Services
 
             if (restaurant.Name != restaurantDto.Restaurant.Name)
             { 
-                restaurantDto.Restaurant.Menu.ForEach(x => x.RestaurantName = restaurantDto.Restaurant.Name);            
+                restaurantDto.Restaurant.Menu.ForEach(x => x.RestaurantName = restaurantDto.Restaurant.Name);
             }
             else
             {
@@ -44,6 +50,8 @@ namespace Orderino.Infrastructure.Services
 
             loginInfo.Restaurants.First(x => x.RestaurantId == restaurant.Id).RestaurantName = restaurantDto.Restaurant.Name;
             loginInfo.Restaurants.First(x => x.RestaurantId == restaurant.Id).BannerUrl = restaurantDto.Restaurant.Name;
+
+            restaurant = restaurantDto.Restaurant;
 
             await restaurantRepository.Update(restaurant);
             await loginInfoRepository.Update(loginInfo);

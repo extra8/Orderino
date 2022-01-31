@@ -33,7 +33,7 @@
     <div class="banner-container" style="margin-top: 50px; padding-bottom: 20px;">
         <div class="banner" style="display: flex; padding-bottom: 20px;">
             <div style="display:inline-flex;">
-                <img src="@logoPath" width="60px">
+                <img src="@logoPath" style="width: 60px;">
 
                 <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: white;">
                     Orderino
@@ -54,13 +54,14 @@
     protected override void OnInitialized()
     {
         string uri = navigationManager.Uri.ToString();
+        int count = uri.Split('/').Length - 1;
 
         showAdminNavMenu = uri.Contains("restaurant-management") ||
-                           uri.Contains("admin-login") ||
-                           uri.Contains("admin-restaurants") ||
-                           uri.Contains("restaurant-statistics");
+                       uri.Contains("admin-login") ||
+                       uri.Contains("admin-restaurants") ||
+                       uri.Contains("restaurant-statistics");
 
-        showSimpleNavMenu = uri.Contains("history");
+        showSimpleNavMenu = uri.Contains("history") || count == 3;
     }
 
 

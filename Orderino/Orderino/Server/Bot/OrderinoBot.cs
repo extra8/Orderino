@@ -35,11 +35,17 @@ namespace Orderino.Server.Bot
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            string welcomeText = "Hello and welcome! How about a snack?";
+            var members = await GetChannelMembers(turnContext, cancellationToken);
 
+            var membersAddedIds = membersAdded.Select(x => x.Id).ToList();
+            var membersToGreet = members.Where(x => membersAddedIds.Contains(x.Id)).ToList();
+
+            await StoreUsers(turnContext, cancellationToken);
+
+            string welcomeText = BuildGreetMessage(membersToGreet);
             await turnContext.SendActivityAsync(MessageFactory.Text(welcomeText, welcomeText), cancellationToken);
         }
-
+       
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
             try
@@ -66,7 +72,7 @@ namespace Orderino.Server.Bot
                             break;
 
                         case "order":
-                            await CreateOrderForConversation(turnContext);
+                            await CreateOrderForConversation(turnContext, cancellationToken);
                             logger.LogInformation("Sending an order card");
                             var orderCard = new OrderCard();
                             await orderCard.SendOrderCard(turnContext, cancellationToken);
@@ -107,7 +113,30 @@ namespace Orderino.Server.Bot
                 logger.LogError(ex, "An error has occured!", turnContext);
                 throw;
             }
-        }       
+        }
+
+        private string BuildGreetMessage(List<TeamsChannelAccount> members)
+        {
+
+            if (members.Count == 1)
+            {
+                var first = members.First();
+                return $"Hello and welcome, {first.Name}! How about a snack?";
+            }
+
+            if (members.Count == 2)
+            {
+                return "Hello and welcome, you two! How about a snack?";
+            }
+
+            if (members.Count >= 3)
+            {
+                return "Hello and welcome, everyone! How about a snack?";
+            }
+
+            return "Hello and welcome! How about a snack?";
+        }
+
 
         private async Task<InvokeResponse> ResponseToButtonClick(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
         {   
@@ -124,6 +153,7 @@ namespace Orderino.Server.Bot
                         break;
 
                     case "order":
+                        await CreateOrderForConversation(turnContext, cancellationToken);
                         moduleType = TaskModuleType.Order;
                         break;
 
@@ -132,7 +162,6 @@ namespace Orderino.Server.Bot
                         break;
                 }
 
-                await CreateOrderForConversation(turnContext);
                 return TaskModuleFactory.GetTaskModule(moduleType, turnContext, configuration);
             }
             catch
@@ -141,7 +170,7 @@ namespace Orderino.Server.Bot
             }            
         }
 
-        private async Task StoreUsers(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+        private async Task<List<TeamsChannelAccount>> GetChannelMembers(ITurnContext turnContext, CancellationToken cancellationToken)
         {
             var members = new List<TeamsChannelAccount>();
             string continuationToken = null;
@@ -154,6 +183,13 @@ namespace Orderino.Server.Bot
             }
             while (continuationToken != null);
 
+            return members;
+        }
+
+        private async Task StoreUsers(ITurnContext turnContext, CancellationToken cancellationToken)
+        {
+            var members = await GetChannelMembers(turnContext, cancellationToken);
+
             List<User> users = members.Select(x => new User
             {
                 Id = x.AadObjectId,
@@ -165,15 +201,16 @@ namespace Orderino.Server.Bot
             await userRepository.BulkAddAsync(users);
         }
 
-        private async Task CreateOrderForConversation(ITurnContext turnContext)
+        private async Task CreateOrderForConversation(ITurnContext turnContext, CancellationToken cancellationToken)
         {
-            Order order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id);
+            Order order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id, true);
 
             if (order == null || order?.Initiator == null)
             {
                 User user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
                 order.Initiator = user;
                 order.Initiator.Favorites = null;
+                order.Initiator.RecentRestaurantIds = null;
 
                 if (turnContext.Activity.Conversation.ConversationType == "personal")
                     order.OrderType = OrderType.Personal;
@@ -181,6 +218,17 @@ namespace Orderino.Server.Bot
                     order.OrderType = OrderType.Group;
 
                 await orderRepository.Update(order);
+            }
+
+            var members = await GetChannelMembers(turnContext, cancellationToken);
+
+            if (!members.Any(x => x.Id == order.Initiator.Id))
+            {
+                User user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
+                order.Initiator = user;
+
+                string initiatorChangedText = $"Initiator was removed from conversation. {user.FirstName} {user.LastName} is not the order initiator.";
+                await turnContext.SendActivityAsync(MessageFactory.Text(initiatorChangedText, initiatorChangedText), cancellationToken);
             }
         }
     }

@@ -7,6 +7,7 @@
 
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject BrowserService browserService
 
 
 <style>
@@ -18,40 +19,59 @@
     }
 </style>
 
-<div style="margin: 0 auto; width: 70vw; padding-top: 50px;">
-    <h3 class="font" style="color: white; font-size: 40px;">Order History</h3>
+<div style="margin: 0 auto; padding: 20px;">
 
-    <div style="@showReorderStyle">
+    <div style="padding-top: 3%; display: grid; grid-template-columns: 1fr; justify-content: center; align-content: space-between; max-width: 500px; margin: 0 auto;">
 
-        <div style="padding-top: 12px; padding-right: 30px;">
-            <select class="font" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 28vw; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedOrderId">
-                <option class="font" value=""></option>
-                @if (finalizedOrder != null && finalizedOrder.Orders != null)
-                {
-                    @foreach (var order in finalizedOrder.Orders)
+        <div style="padding-top: 12px;">
+            @if (dimensions != null && dimensions.Width > 750)
+            {
+                <select class="font" style="width: 100%; border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; font-size: 20px; padding: 10px; color: #e74444;" @bind="@selectedOrderId">
+                    <option class="font" value=""></option>
+                    @if (finalizedOrder != null && finalizedOrder.Orders != null)
                     {
-                        <option class="font" value="@order.FinalizedId">@order.FinalizedTime?.ToString("dddd, dd MMMM yyyy HH:mm")</option>
+                        @foreach (var order in finalizedOrder.Orders)
+                        {
+                            <option class="font" value="@order.FinalizedId">@order.FinalizedTime?.ToString("ddd, dd MMMM yyyy HH:mm")</option>
+                        }
                     }
-                }
-            </select>
+                </select>
+            }
+            else
+            {
+                <select class="font" style="width: 100%; border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; font-size: 16px; padding: 10px; color: #e74444;" @bind="@selectedOrderId">
+                    <option class="font" value=""></option>
+                    @if (finalizedOrder != null && finalizedOrder.Orders != null)
+                    {
+                        @foreach (var order in finalizedOrder.Orders)
+                        {
+                            <option class="font" value="@order.FinalizedId">@order.FinalizedTime?.ToString("ddd, dd MMMM yyyy HH:mm")</option>
+                        }
+                    }
+                </select>
+            }
+
         </div>
 
-        <div style="">
-            <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="ViewOrder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">View</button>
-        </div>
-
-        @if (showReorder)
-        {
+        <div style="display: grid; grid-template-columns: auto auto; justify-content: center;">
             <div style="">
-                <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="Reorder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Reorder</button>
+                <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="ViewOrder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">View</button>
             </div>
-        }
+
+            @if (showReorder)
+            {
+                <div style="">
+                    <button class="btn btn-outline-light btn-lg px-5 font" type="submit" @onclick="Reorder" style="margin: 10px; color: #e74444; border-color: #e74444; font-weight: bold; border-width: 2px;">Reorder</button>
+                </div>
+            }
+        </div>
+        
     </div>
 
     @if (showOrder)
     {
         <div style="padding-top: 30px;">
-            <div style="width: 60%; margin-left: 20%; border-style: solid; border-color: #e53333; border-radius: 5px; background-color: #e53333;">
+            <div style="max-width: 900px; margin: 0 auto; border-style: solid; border-color: #e53333; border-radius: 5px; background-color: #e53333;">
                 <MudExpansionPanels MultiExpansion="true" Style="background-color: black;">
 
                     @foreach (var keyVal in GetItemsByUser())
@@ -77,14 +97,28 @@
                                         <ChildContent>
                                             @foreach (var orderItem in keyVal.Value)
                                             {
-                                                <div style="display: grid; grid-template-columns: 5fr 1fr;">
-                                                    <div style="color: #594ae2; padding-top: 10px;">
-                                                        <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                if (dimensions.Width > 750)
+                                                {
+                                                    <div style="display: grid; grid-template-columns: 12fr 1fr;">
+                                                        <div style="color: #594ae2; padding-top: 10px;">
+                                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                        </div>
+                                                        <div style="color: #594ae2; padding-top: 10px;">
+                                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-weight: bold; float: right; padding-right: 8px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
+                                                        </div>
                                                     </div>
-                                                    <div style="color: #594ae2; padding-top: 10px;">
-                                                        <MudText Typo="Typo.h6" Style="color: #e74444; font-weight: bold; float: right; padding-right: 30px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
+                                                }
+                                                else
+                                                {
+                                                    <div style="display: grid; grid-template-columns: 12fr 1fr;">
+                                                        <div style="color: #594ae2; padding-top: 10px; overflow: hidden; margin-right: 10px;">
+                                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-size: 18px;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                        </div>
+                                                        <div style="color: #594ae2; padding-top: 10px;">
+                                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-size: 18px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                }
                                             }
                                         </ChildContent>
                                     </MudExpansionPanel>
@@ -115,24 +149,19 @@
     private string selectedOrderId;
     private bool showOrder;
     private bool showReorder;
-    private string showReorderStyle;
-
+    private WindowDimension dimensions;
 
     protected override async Task OnInitializedAsync()
     {
+        dimensions = await browserService.GetDimensions();
+
         finalizedOrder = await httpClient.GetFromJsonAsync<FinalizedOrder>($"finalized-orders/{orderId}");
         currentOrder = await httpClient.GetFromJsonAsync<Order>($"order/{orderId}");
-
-        showReorderStyle = "padding-top: 3%; display: grid; grid-template-columns: auto auto; justify-content: center; align-content: space-between;";
 
         if (currentOrder != null && currentOrder?.Initiator != null)
         {
             if (currentOrder.OrderType == OrderType.Personal)
-            {
                 showReorder = true;
-
-                showReorderStyle = "padding-top: 3%; display: grid; grid-template-columns: auto auto auto; justify-content: center; align-content: space-between;";
-            }
         }
     }
 

@@ -222,7 +222,7 @@ namespace Orderino.Server.Bot
 
             var members = await GetChannelMembers(turnContext, cancellationToken);
 
-            if (!members.Any(x => x.Id == order.Initiator.Id))
+            if (!members.Any(x => x.AadObjectId == order.Initiator.Id))
             {
                 User user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
                 order.Initiator = user;

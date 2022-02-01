@@ -6,6 +6,7 @@
 
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject BrowserService browserService
 
 
 <div class="menu-items-container-background">
@@ -93,6 +94,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var dimensions = await browserService.GetDimensions();
+
         restaurant = await httpClient.GetFromJsonAsync<Restaurant>($"restaurant/{restaurantId}");
 
         await AddToUserRecents();

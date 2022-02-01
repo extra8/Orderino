@@ -7,7 +7,7 @@
 
 .container-background {
     margin: 0 auto;
-    width: 70vw;
+    max-width: 1350px;
 }
 
 .banner-container {

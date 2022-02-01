@@ -2,10 +2,13 @@
 
 @using Microsoft.AspNetCore.WebUtilities;
 @using Microsoft.Extensions.Primitives;
+@using Orderino.Shared.DTOs;
 @using Orderino.Shared.Models;
+@using System.Text.Json
 
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject BrowserService browserService
 
 
 <div class="container-background">
@@ -47,16 +50,24 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var dimensions = await browserService.GetDimensions();
+
         user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
 
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out StringValues search);
+        Console.WriteLine(search);
 
-        string route = "restaurant/all-basic";
-        if (!string.IsNullOrWhiteSpace(search))
-            route = route + $"/{search}";
+        var searchDto = new SearchDto
+        {
+            Search = search
+        };
 
-        restaurants = await httpClient.GetFromJsonAsync<List<Restaurant>>(route);
+        var response = await httpClient.PostAsJsonAsync("restaurant/all-basic", searchDto);
+
+        response.EnsureSuccessStatusCode();
+        string content = await response.Content.ReadAsStringAsync();
+        restaurants = JsonSerializer.Deserialize<List<Restaurant>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
 
     private void OpenRestaurant(Restaurant restaurant)

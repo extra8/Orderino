@@ -4,6 +4,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MudBlazor.Services;
+using Orderino.Client.Shared;
 
 namespace Orderino.Client
 {
@@ -16,6 +17,7 @@ namespace Orderino.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddMudServices();
+            builder.Services.AddScoped<BrowserService>();
 
             await builder.Build().RunAsync();
         }

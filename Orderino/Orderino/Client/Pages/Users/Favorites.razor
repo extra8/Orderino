@@ -5,6 +5,7 @@
 @using System.Linq
 
 @inject HttpClient httpClient
+@inject BrowserService browserService
 
 
 <div class="menu-items-container-background">
@@ -82,6 +83,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var dimensions = await browserService.GetDimensions();
+
         user = await httpClient.GetFromJsonAsync<User>($"user/{userId}");
     }
 

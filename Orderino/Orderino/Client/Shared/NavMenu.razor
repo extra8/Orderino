@@ -1,33 +1,73 @@
-﻿@inject NavigationManager navigationManager
+﻿@using Microsoft.AspNetCore.WebUtilities;
+
+@inject NavigationManager navigationManager
+@inject BrowserService browserService
 
 
-<div class="banner-container">
-    <div class="banner">
-        <div style="display:inline-flex; cursor:pointer;">
-            <a @onclick="@NavigateHome">
-                <img src="@logoPath" style="width:60px;">
-            </a>
+@if (dimensions != null && dimensions.Width > 750)
+{
+    <div class="banner-container">
+        <div class="banner">
+            <div style="display:inline-flex; cursor:pointer;">
+                <a @onclick="@NavigateHome">
+                    <img src="@logoPath" style="width:60px;">
+                </a>
 
-            <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="NavigateHome">
-                Orderino
-            </NavLink>
-        </div>
-        <div>
-            <form class="top-menu-search">
-                <input type="text" name="search" @bind-value="@searchTerm" class="top-menu-search-box">
-            </form>
-        </div>
-        <div style="display:inline-flex;">
-            <NavLink class="nav-link top-menu-favorites" href="@($"/favorites/{orderId}/{userId}")">
-                <span class="oi oi-star"></span>
-            </NavLink>
+                <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="NavigateHome">
+                    Orderino
+                </NavLink>
+            </div>
+            <div>
+                <form class="top-menu-search">
+                    <input type="text" name="search" @bind-value="@searchTerm" class="top-menu-search-box">
+                    <button @onclick="Search"><i class="oi oi-magnifying-glass" style="display: table-cell; color: #e74444; font-size: 20px; padding-bottom: 8px; padding-left: 8px;"></i></button>
+                </form>
+            </div>
+            <div style="display:inline-flex;">
+                <NavLink class="nav-link top-menu-favorites" href="@($"/favorites/{orderId}/{userId}")">
+                    <span class="oi oi-star"></span>
+                </NavLink>
 
-            <NavLink class="nav-link top-menu-cart" href="@($"/cart/{orderId}/{userId}")">
-                <span class="oi oi-cart"></span>
-            </NavLink>
+                <NavLink class="nav-link top-menu-cart" href="@($"/cart/{orderId}/{userId}")">
+                    <span class="oi oi-cart"></span>
+                </NavLink>
+            </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="banner-container">
+        <div style="display: grid; grid-template-columns: auto; width: 70vw; justify-content: space-evenly; place-items: center; padding-top: 20px;">
+            <div style="display:inline-flex; cursor:pointer;">
+                <a @onclick="@NavigateHome">
+                    <img src="@logoPath" style="width:60px;">
+                </a>
+
+                <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;" @onclick="NavigateHome">
+                    Orderino
+                </NavLink>
+            </div>
+            <div style="display: flex;">
+                <div>
+                    <form style="padding-top: 8px; display: flex;">
+                        <input type="text" name="search" @bind-value="@searchTerm" style="border-color: #e74444; background-color: black; border-style: solid; border-radius: 8px; width: 35vw; height: 4vh; font-size: 20px; padding: 10px; color: #e74444;">
+                        <button @onclick="Search"><i class="oi oi-magnifying-glass" style="display: table-cell; color: #e74444; font-size: 20px; padding-left: 8px; padding-right: 25px;"></i></button>
+                    </form>
+                </div>
+                <div style="display:inline-flex;">
+                    <NavLink class="nav-link top-menu-favorites" href="@($"/favorites/{orderId}/{userId}")">
+                        <span class="oi oi-star"></span>
+                    </NavLink>
+
+                    <NavLink class="nav-link top-menu-cart" href="@($"/cart/{orderId}/{userId}")">
+                        <span class="oi oi-cart"></span>
+                    </NavLink>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 
 @code {
@@ -38,9 +78,12 @@
     private string currentUrl;
     private string userId;
     private string orderId;
+    private WindowDimension dimensions;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        dimensions = await browserService.GetDimensions();
+
         currentUrl = navigationManager.Uri.ToString();
 
         if (currentUrl.Contains("?search"))
@@ -82,5 +125,12 @@
         var path = $"/restaurant-browser/{orderId}/{userId}";
 
         navigationManager.NavigateTo(path, forceLoad: true);
+    }
+
+    private void Search()
+    {
+        var query = new Dictionary<string, string> { { "search", searchTerm } };
+
+        navigationManager.NavigateTo(QueryHelpers.AddQueryString($"/restaurant-browser/{orderId}/{userId}", query));
     }
 }

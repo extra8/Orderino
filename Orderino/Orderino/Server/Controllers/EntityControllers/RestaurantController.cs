@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Orderino.Infrastructure.EntityServices.Interfaces;
+using Orderino.Shared.DTOs;
 using Orderino.Shared.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,19 +25,17 @@ namespace Orderino.Server.Controllers.EntityControllers
             return Ok(result);
         }
 
-        [HttpGet("all/{search}")]
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAll(string search = null)
+        [HttpPost("all")]
+        public async Task<IActionResult> GetAll([FromBody] SearchDto searchDto)
         {
-            List<Restaurant> result = await restaurantService.GetAll(search);
+            List<Restaurant> result = await restaurantService.GetAll(searchDto.Search);
             return Ok(result);
         }
 
-        [HttpGet("all-basic/{search}")]
-        [HttpGet("all-basic")]
-        public async Task<IActionResult> GetAllBasic(string search = null)
+        [HttpPost("all-basic")]
+        public async Task<IActionResult> GetAllBasic([FromBody] SearchDto searchDto)
         {
-            List<Restaurant> result = await restaurantService.GetAllBasic(search);
+            List<Restaurant> result = await restaurantService.GetAllBasic(searchDto.Search);
             return Ok(result);
         }
 

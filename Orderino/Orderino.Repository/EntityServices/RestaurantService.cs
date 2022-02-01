@@ -33,9 +33,13 @@ namespace Orderino.Infrastructure.EntityServices
             List<Restaurant> restaurants;
 
             if (!string.IsNullOrEmpty(search))
+            {
                 restaurants = await restaurantRepository.QueryByFieldName("Name", search);
-
-            restaurants = await restaurantRepository.QueryAllItemsAsync();
+            }
+            else
+            {
+                restaurants = await restaurantRepository.QueryAllItemsAsync();
+            }          
 
             restaurants.ForEach(x => x.Menu = null);
 

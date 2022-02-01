@@ -24,7 +24,17 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-    <script src="components/bootstrap/dist/js/bootstrap.js" type="text/javascript" ></script>
+
+    <script type="text/javascript">
+        window.getDimensions = function () {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        };
+    </script>
+
+    <script src="components/bootstrap/dist/js/bootstrap.js" type="text/javascript"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="inputfile.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>

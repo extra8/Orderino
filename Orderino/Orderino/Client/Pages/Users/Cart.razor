@@ -5,6 +5,8 @@
 
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject BrowserService browserService
+@inject ISnackbar Snackbar
 
 
 <style>
@@ -20,7 +22,7 @@
     <div style="display: grid; grid-gap: 2vh; padding: 20px; grid-template-columns: 1fr; justify-items: center;">
         @if (order != null && order.Items != null && order.Items.Count != 0)
         {
-            <div style="width: 40vw; border-style: solid; border-color: #e53333; border-radius: 5px; background-color: #e53333;">
+            <div style="max-width: 800px; border-style: solid; border-color: #e53333; border-radius: 5px; background-color: #e53333;">
 
                 <MudExpansionPanels MultiExpansion="true" Style="background-color: black;">
 
@@ -47,13 +49,30 @@
                                         <ChildContent>
                                             @foreach (SelectedOrderItem orderItem in keyVal.Value)
                                             {
-                                                <div style="display: grid; grid-template-columns: 5fr 0.7fr 1fr;">
-                                                    <div style="color: #594ae2; padding-top: 10px;">
-                                                        <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                if (dimensions.Width > 750)
+                                                {
+                                                    <div style="display: grid; grid-template-columns: 12fr 2fr;">
+                                                        <div style="color: #594ae2; padding-top: 10px;">
+                                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                        </div>
+                                                        <div style="display: grid; grid-template-columns: auto auto;">
+                                                            <MudTextField @bind-Value="orderItem.OrderItem.Quantity" Variant="Variant.Outlined" Class="font" Style="color: black; border-color: #e74444; border-width: 1px; border-style: solid; border-radius: 5px;" Margin="Margin.Dense" @onfocusout="() => ModifyOrder(orderItem)"></MudTextField>
+                                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Style="color: #e74444" @onclick="() => DeleteOrderItem(orderItem)"></MudIconButton>
+                                                        </div>
                                                     </div>
-                                                    <MudTextField @bind-Value="orderItem.OrderItem.Quantity" Variant="Variant.Outlined" Class="font" Style="color: black; border-color: #e74444; border-width: 1px; border-style: solid; border-radius: 5px;" Margin="Margin.Dense" @onfocusout="() => ModifyOrder(orderItem)"></MudTextField>
-                                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Style="color: #e74444" @onclick="() => DeleteOrderItem(orderItem)"></MudIconButton>
-                                                </div>
+                                                }
+                                                else
+                                                {
+                                                    <div style="display: grid; grid-template-columns: auto;">
+                                                        <div style="color: #594ae2; padding-top: 10px;">
+                                                            <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
+                                                        </div>
+                                                        <div style="display: grid; grid-template-columns: 10fr auto;">
+                                                            <MudTextField @bind-Value="orderItem.OrderItem.Quantity" Variant="Variant.Outlined" Class="font" Style="max-width: 60px; color: black; border-color: #e74444; border-width: 1px; border-style: solid; border-radius: 5px;" Margin="Margin.Dense" @onfocusout="() => ModifyOrder(orderItem)"></MudTextField>
+                                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Style="color: #e74444" @onclick="() => DeleteOrderItem(orderItem)"></MudIconButton>
+                                                        </div>
+                                                    </div>
+                                                }
                                             }
                                         </ChildContent>
                                     </MudExpansionPanel>
@@ -66,7 +85,7 @@
         }
         @if (order?.Initiator?.Id == userId)
         {
-            <div style="width: 40vw;">
+            <div>
                 <div class="row">
                     <div class="col-md-8 mb-4">
                         <div class="card mb-4" style=" border-width: 3.5px; border-style: solid; border-radius: 5px; border-color: #e74444;">
@@ -160,9 +179,12 @@
     private string address;
     private string phone;
     private string additionalInfo;
+    private WindowDimension dimensions;
 
     protected override async Task OnParametersSetAsync()
     {
+        dimensions = await browserService.GetDimensions();
+
         order = await httpClient.GetFromJsonAsync<Order>($"order/{orderId}");
     }
 
@@ -233,21 +255,26 @@
 
     private async Task FinalizeOrder()
     {
-        var finalizeOrderDto = new FinalizeOrderDto
-        {
-            OrderId = orderId,
-            UserId = userId,
-            FirstName = firstName,
-            LastName = lastName,
-            Address = address,
-            Phone = phone,
-            AdditionalInfo = additionalInfo
-        };
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+        Snackbar.Configuration.ShowCloseIcon = false;
+        Snackbar.Add("Message", Severity.Error);
 
-        await httpClient.PostAsJsonAsync("cart/finalize", finalizeOrderDto);
+        //var finalizeOrderDto = new FinalizeOrderDto
+        //{
+        //    OrderId = orderId,
+        //    UserId = userId,
+        //    FirstName = firstName,
+        //    LastName = lastName,
+        //    Address = address,
+        //    Phone = phone,
+        //    AdditionalInfo = additionalInfo
+        //};
 
-        string route = $"/restaurant-browser/{orderId}/{userId}";
-        navigationManager.NavigateTo(route);
+        //await httpClient.PostAsJsonAsync("cart/finalize", finalizeOrderDto);
+
+        //string route = $"/restaurant-browser/{orderId}/{userId}";
+        //navigationManager.NavigateTo(route);
     }
 
 }

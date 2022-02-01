@@ -1,18 +1,44 @@
-﻿<div class="banner-container">
-    <div class="banner">
-        <div style="display:inline-flex;">
-            <img src="@logoPath" style="width:60px;">
+﻿@inject BrowserService browserService
 
-            <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;">
-                Orderino
-            </NavLink>
+
+@if (dimensions != null && dimensions.Width > 750)
+{
+    <div class="banner-container">
+        <div class="banner">
+            <div style="display:inline-flex;">
+                <img src="@logoPath" style="width:60px;">
+
+                <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;">
+                    Orderino
+                </NavLink>
+            </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="banner-container">
+        <div style="display: flex; padding-top: 20px;">
+            <div style="display:inline-flex;">
+                <img src="@logoPath" style="width:60px;">
+
+                <NavLink class="nav-link top-menu-logo font" style="font-size: 30px; font-weight: 600; color: #e74444;">
+                    Orderino
+                </NavLink>
+            </div>
+        </div>
+    </div>
+}
 
 
 @code {
 
     private string logoPath = "assets/OrderinoLogo.png";
 
+    private WindowDimension dimensions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dimensions = await browserService.GetDimensions();
+    }
 }

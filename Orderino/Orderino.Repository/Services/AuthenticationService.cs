@@ -2,6 +2,7 @@
 using Orderino.Shared.DTOs;
 using Orderino.Shared.Models;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Orderino.Infrastructure.Services
@@ -24,7 +25,7 @@ namespace Orderino.Infrastructure.Services
             if (loginInfo == null)
                 return null;
 
-            if (loginInfo.Password != authDto.Password)
+            if (loginInfo.Password != Base64Encode(authDto.Password))
                 return null;
 
             loginInfo.Token = Guid.NewGuid().ToString();
@@ -33,6 +34,18 @@ namespace Orderino.Infrastructure.Services
             await loginInfoRepository.Update(loginInfo);
 
             return loginInfo;
+        }
+
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+            return Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+
+        public static string Base64Encode(string plainText)
+        {
+            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(plainTextBytes);
         }
     }
 }

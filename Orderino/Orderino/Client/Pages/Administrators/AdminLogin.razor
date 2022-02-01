@@ -6,6 +6,7 @@
 
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject ISnackbar Snackbar
 
 
 <section class="gradient-custom" style="height: 70vh">
@@ -81,7 +82,16 @@
         }
         catch (Exception ex)
         {
+            Warn("No account exists with the given username and password combination.");
         }
+    }
+
+    private void Warn(string message)
+    {
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        Snackbar.Configuration.ShowCloseIcon = false;
+        Snackbar.Add(message, Severity.Error);
     }
 
 }

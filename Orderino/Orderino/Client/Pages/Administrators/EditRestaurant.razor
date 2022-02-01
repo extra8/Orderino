@@ -9,6 +9,7 @@
 
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject ISnackbar Snackbar
 
 
 <center>
@@ -216,6 +217,20 @@
 
     private async Task SaveChanges()
     {
+        restaurant.Menu.RemoveAll(x => string.IsNullOrEmpty(x.Name) || string.IsNullOrEmpty(x.MenuCategory));
+
+        if (restaurant.Menu.Any(x => string.IsNullOrEmpty(x.Name)))
+        {
+            Warn("One or more products has an invalid name. Please resolve and try again.");
+            return;
+        }
+
+        if (restaurant.Menu.Any(x => string.IsNullOrEmpty(x.Name)))
+        {
+            Warn("One or more products has an invalid category. Please resolve and try again.");
+            return;
+        }
+
         var modifyRestaurantDto = new ModifyRestaurantDto
         {
             Restaurant = restaurant,
@@ -302,6 +317,14 @@
         List<string> categories = menuCategories.Split(';').Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Trim()).ToList();
 
         return categories;
+    }
+
+    private void Warn(string message)
+    {
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+        Snackbar.Configuration.ShowCloseIcon = false;
+        Snackbar.Add(message, Severity.Error);
     }
 
 }

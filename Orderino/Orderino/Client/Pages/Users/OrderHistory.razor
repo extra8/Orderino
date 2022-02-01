@@ -8,6 +8,7 @@
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
 @inject BrowserService browserService
+@inject ISnackbar Snackbar
 
 
 <style>
@@ -30,7 +31,7 @@
                     <option class="font" value=""></option>
                     @if (finalizedOrder != null && finalizedOrder.Orders != null)
                     {
-                        @foreach (var order in finalizedOrder.Orders)
+                        @foreach (var order in finalizedOrder.Orders.OrderByDescending(x => x.FinalizedTime))
                         {
                             <option class="font" value="@order.FinalizedId">@order.FinalizedTime?.ToString("ddd, dd MMMM yyyy HH:mm")</option>
                         }
@@ -43,7 +44,7 @@
                     <option class="font" value=""></option>
                     @if (finalizedOrder != null && finalizedOrder.Orders != null)
                     {
-                        @foreach (var order in finalizedOrder.Orders)
+                        @foreach (var order in finalizedOrder.Orders.OrderByDescending(x => x.FinalizedTime))
                         {
                             <option class="font" value="@order.FinalizedId">@order.FinalizedTime?.ToString("ddd, dd MMMM yyyy HH:mm")</option>
                         }
@@ -65,7 +66,7 @@
                 </div>
             }
         </div>
-        
+
     </div>
 
     @if (showOrder)
@@ -144,7 +145,6 @@
     public string userId { get; set; }
 
     private FinalizedOrder finalizedOrder;
-    private Order currentOrder;
     private Order selectedOrder;
     private string selectedOrderId;
     private bool showOrder;
@@ -156,11 +156,10 @@
         dimensions = await browserService.GetDimensions();
 
         finalizedOrder = await httpClient.GetFromJsonAsync<FinalizedOrder>($"finalized-orders/{orderId}");
-        currentOrder = await httpClient.GetFromJsonAsync<Order>($"order/{orderId}");
 
-        if (currentOrder != null && currentOrder?.Initiator != null)
+        if (finalizedOrder != null && finalizedOrder.Orders != null && finalizedOrder.Orders.Any())
         {
-            if (currentOrder.OrderType == OrderType.Personal)
+            if (finalizedOrder.Orders.Any(x => x.OrderType == OrderType.Personal))
                 showReorder = true;
         }
     }
@@ -168,7 +167,10 @@
     private void ViewOrder()
     {
         if (string.IsNullOrEmpty(selectedOrderId))
+        {
+            Warn("Please select a past order to view.");
             return;
+        }
 
         selectedOrder = finalizedOrder.Orders.First(x => x.FinalizedId == selectedOrderId);
         showOrder = true;
@@ -213,7 +215,10 @@
     private async Task Reorder()
     {
         if (string.IsNullOrEmpty(selectedOrderId))
+        {
+            Warn("Please select a past order to reorder.");
             return;
+        }
 
         var reorderDto = new ReorderDto
         {
@@ -224,6 +229,14 @@
 
         await httpClient.PostAsJsonAsync("reorder", reorderDto);
         navigationManager.NavigateTo($"cart/{orderId}/{userId}", forceLoad: true);
+    }
+
+    private void Warn(string message)
+    {
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+        Snackbar.Configuration.ShowCloseIcon = false;
+        Snackbar.Add(message, Severity.Error);
     }
 
 }

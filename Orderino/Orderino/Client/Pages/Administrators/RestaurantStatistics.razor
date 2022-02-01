@@ -35,7 +35,7 @@
     }
 </style>
 
-<div class="menu-items-container-background">
+<div style=" margin: 0 auto; max-width: 80%;">
     @if (restaurantStatistic != null && restaurantStatistic.Name != null)
     {
         <div style="display: grid; grid-template-columns: 70% auto; grid-gap: 2vw; justify-content: space-between; padding-top: 50px; padding-bottom: 50px;">
@@ -52,7 +52,7 @@
 
             <div style="display: grid; grid-template-columns: auto auto; grid-gap: 2vw; justify-content: center; justify-items: center; align-items: center;">
                 <div style="">
-                    <MudDatePicker Label="Start date" @bind-Date="startDate" DateFormat="MM/yyyy" Color="Color.Primary" Editable="false" OpenTo="OpenTo.Year" FixDay="1" />
+                    <MudDatePicker Label="Start date" @bind-Date="startDate" DateFormat="MM/yyyy" Color="Color.Primary" Editable="false" OpenTo="OpenTo.Year" FixDay="1"/>
                 </div>
 
                 <div style="">
@@ -61,17 +61,17 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: auto auto; grid-gap: 2vw; justify-content: space-between; margin-top: 20px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: auto auto; grid-gap: 20px; margin-top: 20px; margin-bottom: 20px;">
             <div>
                 <h2 class="font" style="color: white; font-size: 30px;">Top 5 best sellers</h2>
                 <div style="padding: 20px; background-color: rgba(255, 255, 255); border-radius: 10px;">
-                    <MudChart ChartType="ChartType.Bar" ChartSeries="@topTenBestSellersSeries" @bind-SelectedIndex="index1" XAxisLabels="@labels" Width="100%" Height="350px"></MudChart>
+                    <MudChart ChartType="ChartType.Bar" ChartSeries="@topTenBestSellersSeries" @bind-SelectedIndex="index1" XAxisLabels="@topTenBestSellersLabels" Width="100%" Height="350px"></MudChart>
                 </div>
             </div>
             <div>
                 <h2 class="font" style="color: white; font-size: 30px;">Top 5 worst sellers</h2>
                 <div style="padding: 20px; background-color: rgba(255, 255, 255); border-radius: 10px;">
-                    <MudChart ChartType="ChartType.Bar" ChartSeries="@topTenWorstSellersSeries" @bind-SelectedIndex="index2" XAxisLabels="@labels" Width="100%" Height="350px"></MudChart>
+                    <MudChart ChartType="ChartType.Bar" ChartSeries="@topTenWorstSellersSeries" @bind-SelectedIndex="index2" XAxisLabels="@topTenWorstSellersLabels" Width="100%" Height="350px"></MudChart>
                 </div>
             </div>
         </div>
@@ -91,17 +91,9 @@
                 </select>
             </div>
             <div style="padding: 40px; background-color: rgba(255, 255, 255); border-radius: 10px;">
-                <MudChart ChartType="ChartType.Line" ChartSeries="@productSeries" @bind-SelectedIndex="index3" XAxisLabels="@labels" Width="100%" Height="350px"></MudChart>
+                <MudChart ChartType="ChartType.Line" ChartSeries="@productSeries" @bind-SelectedIndex="index3" XAxisLabels="@monthLabels" Width="100%" Height="350px"></MudChart>
             </div>
         </div>
-
-        <div style="padding-top: 40px; margin-bottom: 20px;">
-            <h2 class="font" style="color: white; font-size: 30px;">Income</h2>
-            <div style="padding: 40px; background-color: rgba(255, 255, 255); border-radius: 10px;">
-                <MudChart ChartType="ChartType.Line" ChartSeries="@incomeSeries" @bind-SelectedIndex="index4" XAxisLabels="@labels" Width="100%" Height="350px"></MudChart>
-            </div>
-        </div>
-
     }
 </div>
 
@@ -130,6 +122,7 @@
         set
         {
             _startDate = value;
+            _startDate = new DateTime(_startDate.Value.Year, _startDate.Value.Month, 1);
             CalculateStatistics();
         }
     }
@@ -143,6 +136,8 @@
         set
         {
             _endDate = value;
+            var day = DateTime.DaysInMonth(_endDate.Value.Year, _endDate.Value.Month);
+            _endDate = new DateTime(_endDate.Value.Year, _endDate.Value.Month, day);
             CalculateStatistics();
         }
     }
@@ -163,12 +158,12 @@
     private int index1 = -1;
     private int index2 = -1;
     private int index3 = -1;
-    private int index4 = -1;
     public List<ChartSeries> topTenBestSellersSeries;
     public List<ChartSeries> topTenWorstSellersSeries;
     public List<ChartSeries> productSeries;
-    public List<ChartSeries> incomeSeries;
-    public string[] labels;
+    public string[] topTenBestSellersLabels;
+    public string[] topTenWorstSellersLabels;
+    public string[] monthLabels;
 
 
     protected override async Task OnInitializedAsync()
@@ -204,12 +199,20 @@
         if (restaurantStatistic.History.Any())
         {
             startDate = restaurantStatistic.History.Select(x => x.TimeStamp).Min().Date;
+            startDate = new DateTime(startDate.Value.Year, startDate.Value.Month, 1);
+
             endDate = restaurantStatistic.History.Select(x => x.TimeStamp).Max().Date;
+            var day = DateTime.DaysInMonth(endDate.Value.Year, endDate.Value.Month);
+            endDate = new DateTime(endDate.Value.Year, endDate.Value.Month, day);
         }
         else
         {
             startDate = DateTime.UtcNow;
+            startDate = new DateTime(startDate.Value.Year, startDate.Value.Month, 1);
+
             endDate = DateTime.UtcNow;
+            var day = DateTime.DaysInMonth(endDate.Value.Year, endDate.Value.Month);
+            endDate = new DateTime(endDate.Value.Year, endDate.Value.Month, day);
         }
 
         CalculateStatistics();
@@ -229,22 +232,26 @@
         var topTenBestFilteredSales = filteredSales.OrderByDescending(x => x.Value.Count()).ThenBy(x => x.Key.Name).Take(5).ToDictionary(x => x.Key, x => x.Value);
         var topTenWorstFilteredSales = filteredSales.OrderBy(x => x.Value.Count()).ThenBy(x => x.Key.Name).Take(5).ToDictionary(x => x.Key, x => x.Value);
 
+        topTenBestSellersLabels = topTenBestFilteredSales.Select(x => x.Key.Name).ToArray();
+        topTenWorstSellersLabels = topTenWorstFilteredSales.Select(x => x.Key.Name).ToArray();
+
         var months = GetIntervalMonths();
 
         MakeBestWorstChartData(months, topTenBestFilteredSales, true);
         MakeBestWorstChartData(months, topTenWorstFilteredSales, false);
-        CalculateIncome(months, filteredSales);
         CalculateProduct(months, filteredSales);
 
-        labels = months.Select(x => x.ToString("MMM yy")).ToArray();
+        monthLabels = months.Select(x => x.ToString("MMM yy")).ToArray();
     }
 
     private void MakeBestWorstChartData(List<DateTime> months, Dictionary<OrderItem, List<DateTime>> topTenBestFilteredSales, bool isBest)
     {
         var series = new List<ChartSeries>();
+
         foreach (var sale in topTenBestFilteredSales)
         {
             var salesByMonth = new List<int>();
+
             foreach (var month in months)
             {
                 var monthSales = sale.Value.Count(x => x.Month == month.Month && x.Year == month.Year);
@@ -254,7 +261,7 @@
             series.Add(new ChartSeries
             {
                 Name = sale.Key.Name,
-                Data = salesByMonth.Select(x => (double)x).ToArray()
+                Data = salesByMonth.Select(x => (double) x).ToArray()
             });
         }
 
@@ -265,30 +272,6 @@
         }
 
         topTenWorstSellersSeries = series;
-    }
-
-    private void CalculateIncome(List<DateTime> months, Dictionary<OrderItem, List<DateTime>> filteredSales)
-    {
-        incomeSeries = new List<ChartSeries>();
-        var monthlyTotals = new List<double>();
-
-        foreach (var month in months)
-        {
-            double monthIncome = 0;
-            foreach (var sale in filteredSales)
-            {
-                var itemMonthlySales = sale.Value.Count(x => x.Month == month.Month && x.Year == month.Year);
-                monthIncome += itemMonthlySales * sale.Key.Price;
-            }
-
-            monthlyTotals.Add(monthIncome);
-        }
-
-        incomeSeries.Add(new ChartSeries
-        {
-            Name = string.Empty,
-            Data = monthlyTotals.ToArray()
-        });
     }
 
     private void CalculateProduct(List<DateTime> months, Dictionary<OrderItem, List<DateTime>> filteredSales)
@@ -318,20 +301,10 @@
 
     private List<DateTime> GetIntervalMonths()
     {
-        var months = new List<DateTime>();
-        DateTime iterationDate = (DateTime)startDate;
+        var months = Enumerable.Range(0, 13).Select(a => startDate.Value.AddMonths(a))
+           .TakeWhile(a => a <= endDate).ToList();
 
-        while (iterationDate <= endDate)
-        {
-            if (startDate.Value.Month == endDate.Value.Month && startDate.Value.Year == endDate.Value.Year)
-            {
-                months.Add((DateTime)iterationDate);
-                break;
-            }
-
-            months.Add((DateTime)iterationDate);
-            iterationDate = iterationDate.AddMonths(1);
-        }
+        months = months.Take(months.Count).ToList();
 
         return months;
     }

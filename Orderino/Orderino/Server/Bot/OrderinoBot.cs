@@ -227,7 +227,7 @@ namespace Orderino.Server.Bot
                 User user = await userRepository.QueryItemAsync(turnContext.Activity.From.AadObjectId);
                 order.Initiator = user;
 
-                string initiatorChangedText = $"Initiator was removed from conversation. {user.FirstName} {user.LastName} is not the order initiator.";
+                string initiatorChangedText = $"The initiator has left the chat. {user.FirstName} {user.LastName} is now the order initiator.";
                 await turnContext.SendActivityAsync(MessageFactory.Text(initiatorChangedText, initiatorChangedText), cancellationToken);
             }
         }

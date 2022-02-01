@@ -129,6 +129,9 @@ else
 
     private void Search()
     {
+        if (string.IsNullOrEmpty(searchTerm))
+            return;
+
         var query = new Dictionary<string, string> { { "search", searchTerm } };
 
         navigationManager.NavigateTo(QueryHelpers.AddQueryString($"/restaurant-browser/{orderId}/{userId}", query));

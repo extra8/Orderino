@@ -100,7 +100,11 @@
     "messageTeamMembers"
   ],
   "validDomains": [
+    "orderinoappservice.azurewebsites.net",
     "https://orderinoappservice.azurewebsites.net",
+    "orderinostorage.blob.core.windows.net",
+    "*.azurewebsites.net",
+    "extra8.onmicrosoft.net",
     "*.ngrok.io"
   ]
 }

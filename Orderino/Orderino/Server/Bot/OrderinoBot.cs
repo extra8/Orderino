@@ -204,6 +204,7 @@ namespace Orderino.Server.Bot
         private async Task CreateOrderForConversation(ITurnContext turnContext, CancellationToken cancellationToken)
         {
             Order order = await orderRepository.QueryItemAsync(turnContext.Activity.Conversation.Id, true);
+            bool shouldUpdate = false;
 
             if (order == null || order?.Initiator == null)
             {
@@ -217,7 +218,7 @@ namespace Orderino.Server.Bot
                 else
                     order.OrderType = OrderType.Group;
 
-                await orderRepository.Update(order);
+                shouldUpdate = true;
             }
 
             var members = await GetChannelMembers(turnContext, cancellationToken);
@@ -229,7 +230,12 @@ namespace Orderino.Server.Bot
 
                 string initiatorChangedText = $"The initiator has left the chat. {user.FirstName} {user.LastName} is now the order initiator.";
                 await turnContext.SendActivityAsync(MessageFactory.Text(initiatorChangedText, initiatorChangedText), cancellationToken);
+
+                shouldUpdate = true;
             }
+
+            if(shouldUpdate)
+                await orderRepository.Update(order);
         }
     }
 }

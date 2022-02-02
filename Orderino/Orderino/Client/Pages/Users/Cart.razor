@@ -55,7 +55,7 @@
                                                         <div style="color: #594ae2; padding-top: 10px;">
                                                             <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
                                                         </div>
-                                                        @if(orderItem.SelectorId != userId)
+                                                        @if(orderItem.SelectorId != userId && userId != order.Initiator.Id)
                                                         {
                                                             <div style="color: #594ae2; padding-top: 10px;">
                                                                 <MudText Typo="Typo.h6" Style="color: #e74444; font-weight: bold; float: right; padding-right: 8px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
@@ -76,7 +76,7 @@
                                                         <div style="color: #594ae2; padding-top: 10px;">
                                                             <MudText Typo="Typo.h6" Style="color: #e74444; font-weight:bold;" Class="font"> @orderItem.OrderItem.Name </MudText>
                                                         </div>
-                                                        @if(orderItem.SelectorId != userId)
+                                                        @if(orderItem.SelectorId != userId && userId != order.Initiator.Id)
                                                         {
                                                             <MudText Typo="Typo.h6" Style="color: #e74444; font-weight: bold; float: right; padding-right: 8px;" Class="font"> @orderItem.OrderItem.Quantity </MudText>
                                                         }
@@ -270,7 +270,7 @@
 
         if (orderItem.OrderItem.Quantity <= 0)
         {
-            Warn("Plase inser valid quantity.");
+            Warn("Plase insert valid quantity.");
             return;
         }
 
